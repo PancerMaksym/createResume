@@ -1,0 +1,38 @@
+.header{
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 10vh;
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: aqua;
+
+    .right{
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        //justify-content: center;
+        align-items: center;
+        
+        .MuiFormControl-root{
+            
+            width: 20vw;
+            //min-width: 120px;
+            height: 8vh;
+            display: flex;
+            align-items: center;
+
+            .css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root{
+                transform: translate(14px, 50%) scale(1);
+            }
+
+            .MuiInputBase-root{
+                border-radius: 50px;
+                height: 100%;
+            }
+
+            
+        }
+    }
+}

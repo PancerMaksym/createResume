@@ -2,6 +2,14 @@
   "name": "create_resume",
   "version": "0.1.0",
   "private": true,
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -9,14 +17,45 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.5",
+    "@apollo/experimental-nextjs-app-support": "^0.11.11",
+    "@apollo/server": "^4.11.3",
+    "@as-integrations/next": "^3.2.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^6.4.8",
+    "@tiptap/pm": "^2.11.7",
+    "@tiptap/react": "^2.11.7",
+    "@tiptap/starter-kit": "^2.11.7",
+    "apollo-server": "^3.13.0",
+    "apollo-server-micro": "^3.13.0",
+    "bcrypt": "^5.1.1",
+    "class-validator": "^0.14.1",
+    "dompurify": "^3.2.5",
+    "dotenv": "^16.4.7",
+    "graphql": "^16.10.0",
+    "graphql-scalars": "^1.24.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.0",
+    "next": "^15.2.3",
+    "nexus": "^1.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.3"
+    "react-icons": "^5.5.0",
+    "react-quill": "^2.0.0",
+    "reflect-metadata": "^0.2.2",
+    "sass": "^1.86.0",
+    "type-graphql": "^2.0.0-rc.2"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^19",
-    "@types/react-dom": "^19"
+    "@types/react-dom": "^19",
+    "@types/react-grid-layout": "^1.3.5",
+    "typescript": "^5"
   }
 }
