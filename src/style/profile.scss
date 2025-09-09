@@ -1,0 +1,43 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-height: 1rem;
+
+  p {
+    margin: 0;
+  }
+
+  td {
+    width: 50%;
+    vertical-align: top;
+    height:100%;
+    text-align: left;
+    padding: 16px;
+
+    img {
+      max-width: 100%;
+    }
+
+    &:focus-within {
+      border-color: #4f46e5; 
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+      background-color: #4f46e5;
+    }
+  }
+}
+
+.profile_page,
+.user_page{
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.main_part{
+  flex: 0 0 25%;
+  background-color: #d1fdff;
+  height: 90vh;
+}
+
+.html_part {
+
+}

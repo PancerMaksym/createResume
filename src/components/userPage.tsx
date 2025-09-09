@@ -3,7 +3,7 @@
 
 import { gql, useQuery } from "@apollo/client";
 import { Avatar } from "@mui/material";
-
+import "@/style/profile.scss"
 const GET_USER = gql`
   query Query($id: ID!) {
     getUser(id: $id) {
@@ -12,7 +12,10 @@ const GET_USER = gql`
         photo
         place
         tags
-        HTMLpart
+        HTMLpart {
+          id
+          content
+        }
       }
     }
   }
@@ -23,7 +26,10 @@ interface Resume {
   photo: string;
   place: string[];
   tags: string[];
-  HTMLpart: string[];
+  HTMLpart: {
+    id: string;
+    content: string;
+  }[];
 }
 
 interface GetUsersResponse {
@@ -40,28 +46,38 @@ const UserPage = ({ userId }: { userId: string }) => {
   if (loading) return <div>loading...</div>;
   if (error) return <div>{error.message}</div>;
 
-  if(data){
-  const user = data?.getUser.resume;
+  if (data) {
+    const user = data?.getUser.resume;
 
-  if (!user) return <div>User not found</div>;
+    if (!user) return <div>User not found</div>;
 
-  return (
-    <div className="user_page">
-      {user.photo ? (
-        <Avatar src={user.photo} alt={user.name} />
-      ) : (
-        <Avatar>{user.name[0]?.toUpperCase()}</Avatar>
-      )}
-      <div>{user.name}</div>
-      {user.place.map((place, index) => (
-        <div key={index}>{place}</div>
-      ))}
-      {user.tags.map((tag, index) => (
-        <div key={index}>{tag}</div>
-      ))}
-    </div>
-  );
-}
+    return (
+      <div className="user_page">
+        <div className="main_part">
+          {user.photo ? (
+            <Avatar src={user.photo} alt={user.name} />
+          ) : (
+            <Avatar>{user.name[0]?.toUpperCase()}</Avatar>
+          )}
+          <div>{user.name}</div>
+          {user.place.map((place, index) => (
+            <div key={index}>{place}</div>
+          ))}
+          {user.tags.map((tag, index) => (
+            <div key={index}>{tag}</div>
+          ))}
+        </div>
+        <div className="html_part">
+          {user.HTMLpart.map((html) => (
+            <div
+              key={html.id}
+              dangerouslySetInnerHTML={{ __html: html.content }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 };
 
 export default UserPage;

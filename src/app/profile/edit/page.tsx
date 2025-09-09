@@ -1,31 +1,21 @@
 "use client";
 import { Avatar, Button, TextField } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Item from "@/components/item";
+import {
+  createContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import "@/style/edit.scss";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import React from "react";
 import {
-  DndContext,
   DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
+  DragStartEvent,
+  UniqueIdentifier,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  horizontalListSortingStrategy,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import Draggable from "@/components/itemDrag";
-import { CSS } from "@dnd-kit/utilities";
-import RowDrag from "@/components/rowDrag";
-import { ConstructionOutlined } from "@mui/icons-material";
+import Kanban from "@/components/kanban";
 
 const GET_USER = gql`
   query Query {
@@ -52,7 +42,10 @@ interface Resume {
   photo: string;
   place: string[];
   tags: string[];
-  HTMLpart: string[][];
+  HTMLpart: {
+    id: string;
+    content: string
+  }[];
 }
 
 interface GetUsersResponse {
@@ -61,25 +54,27 @@ interface GetUsersResponse {
   };
 }
 
-interface ItemType {
+interface ColumnType {
   id: string;
   content: string;
 }
 
-interface ColumnType {
-  id: string;
-  items: ItemType[];
+interface contentType {
+  onDelete: (index: number) => void;
+  onChange: (newText: string, index: number) => void;
+  activeId: UniqueIdentifier | null;
+  activeItemType: "Item" | "Row" | null;
 }
 
-const createItem = (content: string = ""): ItemType => ({
-  id: Math.random().toString(36).substring(2, 10),
+const createColumn = (
+  id: string = Math.random().toString(36).substring(2, 10),
+  content: string = "<table><tbody><tr><td/></tr></tbody></table>"
+): ColumnType => ({
+  id,
   content,
 });
 
-const createColumn = (items: ItemType[] = [createItem()]): ColumnType => ({
-  id: Math.random().toString(36).substring(2, 10),
-  items,
-});
+export const MyContext = createContext<contentType | undefined>(undefined);
 
 const EditPage = () => {
   const router = useRouter();
@@ -94,25 +89,15 @@ const EditPage = () => {
   const [places, setPlaces] = useState<string[]>(user ? user.place : [""]);
   const [tags, setTags] = useState<string[]>(user ? user.tags : [""]);
   const initialHtml: ColumnType[] = user
-    ? user.HTMLpart.map((column) =>
-        createColumn(column.map((cell) => createItem(cell)))
-      )
+    ? user.HTMLpart.map((column) => createColumn(column.id, column.content))
     : [createColumn()];
 
   const [html, setHtml] = useState<ColumnType[]>(initialHtml);
 
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [activeItemType, setActiveType] = useState<"Item" | "Row" | null>(null);
+
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const itemIds = useMemo(
-    () => html.flatMap((row) => row.items.map((item) => `item-${item.id}`)),
-    [html]
-  );
-
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor)
-  );
 
   const onSave = async () => {
     try {
@@ -178,115 +163,32 @@ const EditPage = () => {
     );
   };
 
-  const onDragEnd = (event: DragEndEvent) => {
-    console.log("event: ", event);
-    const { active, over } = event;
+  function onDragStart({ active }: DragStartEvent) {
+    setActiveType(active.data.current?.type);
+    setActiveId(active.data.current?.id);
+  }
 
-    // Перевірка на наявність об'єктів і різні ID
-    if (
-      !over ||
-      !over.data?.current ||
-      !active.data?.current ||
-      active.id === over.id
-    ) {
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    setActiveId(null);
+    setActiveType(null);
+    console.log("Active: ", active);
+    console.log("Over: ", over);
+
+    if (!over?.data?.current || !active.data?.current) {
       return;
     }
 
     const updatedHtml = [...html];
 
-    const activeType = active.data.current?.type;
-    const overType = over.data.current?.type;
+    [
+      updatedHtml[active.data.current.sortable.index],
+      updatedHtml[over.data.current.sortable.index],
+    ] = [
+      updatedHtml[over.data.current.sortable.index],
+      updatedHtml[active.data.current.sortable.index],
+    ];
 
-    // === 1. Переміщення РЯДКІВ ===
-    if (activeType === "Row" && overType === "Row") {
-      console.log(1);
-
-      const activeRowIndex = active.data.current.sortable?.index ?? -1;
-      const overRowIndex = over.data.current.sortable?.index ?? -1;
-
-      if (
-        activeRowIndex >= 0 &&
-        overRowIndex >= 0 &&
-        updatedHtml[activeRowIndex] &&
-        updatedHtml[overRowIndex]
-      ) {
-        [updatedHtml[activeRowIndex], updatedHtml[overRowIndex]] = [
-          updatedHtml[overRowIndex],
-          updatedHtml[activeRowIndex],
-        ];
-      }
-
-      // === 2. Переміщення ЕЛЕМЕНТА в кінець РЯДКА ===
-    } else if (activeType === "Item" && overType === "Row") {
-      console.log(2);
-
-      const fromRowIndex = active.data.current.sortable?.index ?? -1;
-      const toRowIndex = over.data.current.sortable?.index ?? -1;
-      const itemIndex = active.data.current?.item;
-
-      if (
-        fromRowIndex >= 0 &&
-        toRowIndex >= 0 &&
-        typeof itemIndex === "number" &&
-        updatedHtml[fromRowIndex]?.items?.[itemIndex]
-      ) {
-        const [movedItem] = updatedHtml[fromRowIndex].items.splice(
-          itemIndex,
-          1
-        );
-        updatedHtml[toRowIndex].items.push(movedItem);
-      }
-
-      // === 3. Переміщення або заміна між ЕЛЕМЕНТАМИ ===
-    } else if (activeType === "Item" && overType === "Item") {
-      const activeRowIndex = active.data.current.sortable?.index ?? -1;
-      const overRowIndex = over.data.current.sortable?.index ?? -1;
-
-      if (
-        activeRowIndex >= 0 &&
-        overRowIndex >= 0 &&
-        updatedHtml[activeRowIndex]?.items &&
-        updatedHtml[overRowIndex]?.items
-      ) {
-        const activeItemId = active.data.current?.item?.id;
-        const overItemId = over.data.current?.item?.id;
-
-        const activeItemIndex = updatedHtml[activeRowIndex].items.findIndex(
-          (item) => item.id === activeItemId
-        );
-        const overItemIndex = updatedHtml[overRowIndex].items.findIndex(
-          (item) => item.id === overItemId
-        );
-
-        if (activeItemIndex === -1 || overItemIndex === -1) return;
-
-        // === 3.1. Заміна елементів ===
-        if (
-          updatedHtml[activeRowIndex].id === updatedHtml[overRowIndex].id ||
-          updatedHtml[overRowIndex].items.length === 2
-        ) {
-          console.log(3);
-          [
-            updatedHtml[activeRowIndex].items[activeItemIndex],
-            updatedHtml[overRowIndex].items[overItemIndex],
-          ] = [
-            updatedHtml[overRowIndex].items[overItemIndex],
-            updatedHtml[activeRowIndex].items[activeItemIndex],
-          ];
-        }
-
-        // === 3.2. Переміщення елемента в інший рядок ===
-        else {
-          console.log(4);
-          const [movedItem] = updatedHtml[activeRowIndex].items.splice(
-            activeItemIndex,
-            1
-          );
-          updatedHtml[overRowIndex].items.push(movedItem); // або .unshift(movedItem) якщо треба на початок
-        }
-      }
-    }
-
+    console.log("updatedHtml: ", updatedHtml);
     setHtml(updatedHtml);
   };
 
@@ -295,24 +197,16 @@ const EditPage = () => {
     if (!destination) return;
   };
 
-  const onDelete = (rowIndex: number, itemIndex: number) => {
+  const onDelete = (index: number) => {
     const updated = [...html];
-    updated[rowIndex].items.splice(itemIndex, 1);
+    updated.splice(index, 1);
 
-    const cleaned = updated.filter((row) =>
-      row.items.some((cell) => cell !== null)
-    );
-
-    setHtml(cleaned);
-  };
-  const onChange = (newText: string, rowIndex: number, itemIndex: number) => {
-    const updated = [...html];
-    updated[rowIndex].items[itemIndex].content = newText;
     setHtml(updated);
   };
-  const addItem = (rowIndex: number) => {
+
+  const onChange = (newText: string, index: number) => {
     const updated = [...html];
-    updated[rowIndex].items = [...updated[rowIndex].items, createItem()];
+    updated[index].content = newText;
     setHtml(updated);
   };
 
@@ -397,29 +291,9 @@ const EditPage = () => {
       </div>
 
       <div className="html_map">
-        <DndContext
-          onDragEnd={onDragEnd}
-          sensors={sensors}
-          collisionDetection={closestCenter}
-        >
-          <SortableContext
-            items={html.map((row) => `row-${row.id}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            {html.map((row, rowIndex) => (
-              <div key={`row-${rowIndex}`}>
-                <RowDrag
-                  row={row}
-                  itemIds={itemIds}
-                  rowIndex={rowIndex}
-                  onChange={onChange}
-                  onDelete={onDelete}
-                  addItem={addItem}
-                />
-              </div>
-            ))}
-          </SortableContext>
-        </DndContext>
+        <MyContext value={{ onDelete, onChange, activeId, activeItemType }}>
+          <Kanban html={html} onDragEnd={onDragEnd} onDragStart={onDragStart} />
+        </MyContext>
 
         <Button
           onClick={() => {

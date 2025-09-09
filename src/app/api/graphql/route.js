@@ -9,6 +9,16 @@ import bcrypt from "bcrypt";
 await connectDB();
 
 const typeDefs = gql`
+  type HTMLPart {
+    id: String
+    content: String
+  }
+
+  input HTMLPartInput {
+    id: String
+    content: String
+  } 
+
   type User {
     _id: ID!
     email: String!
@@ -20,7 +30,7 @@ const typeDefs = gql`
     name: String!
     place: [String!]!
     tags: [String!]!
-    HTMLpart: [[String]]
+    HTMLpart: [HTMLPart!]
   }
 
   type Query {
@@ -35,7 +45,7 @@ const typeDefs = gql`
     name: String!
     place: [String!]!
     tags: [String!]!
-    HTMLpart: [[String]]
+    HTMLpart: [HTMLPartInput!]
   }
 
   type AuthPayload {
@@ -56,7 +66,7 @@ function generateToken(userId) {
     id: userId,
   };
 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign(payload, JWT_SECRET);
   return token;
 }
 

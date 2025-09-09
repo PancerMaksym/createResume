@@ -1,0 +1,30 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-height: 1rem;
+
+  p {
+    margin: 0;
+    background-color: #fff;
+  }
+
+  td {
+    background-color:beige;
+    width: 50%;
+    vertical-align: top;
+    height:100%;
+    text-align: left;
+    border: 1px solid #000;
+    padding: 16px;
+
+    img {
+      max-width: 100%;
+    }
+
+    &:focus-within {
+      border-color: #4f46e5; 
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+      background-color: #4f46e5;
+    }
+  }
+}
