@@ -7,7 +7,9 @@ const SerchPage = () => {
   return (
     <div className="serch_page">
       <AutoComplete/>
-      <SerchUser/>
+      <React.Suspense fallback={<div>Loading user...</div>}>
+        <SerchUser/>
+      </React.Suspense>
     </div>
   );
 };

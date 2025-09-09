@@ -1,7 +1,6 @@
 "use client";
 import { Avatar, Button, TextField } from "@mui/material";
 import {
-  createContext,
   useEffect,
   useRef,
   useState,
@@ -16,6 +15,7 @@ import {
   UniqueIdentifier,
 } from "@dnd-kit/core";
 import Kanban from "@/components/kanban";
+import myContext from "@/lib/content.ts";
 
 const GET_USER = gql`
   query Query {
@@ -59,13 +59,6 @@ interface ColumnType {
   content: string;
 }
 
-interface contentType {
-  onDelete: (index: number) => void;
-  onChange: (newText: string, index: number) => void;
-  activeId: UniqueIdentifier | null;
-  activeItemType: "Item" | "Row" | null;
-}
-
 const createColumn = (
   id: string = Math.random().toString(36).substring(2, 10),
   content: string = "<table><tbody><tr><td/></tr></tbody></table>"
@@ -74,7 +67,7 @@ const createColumn = (
   content,
 });
 
-export const MyContext = createContext<contentType | undefined>(undefined);
+
 
 const EditPage = () => {
   const router = useRouter();
@@ -291,9 +284,9 @@ const EditPage = () => {
       </div>
 
       <div className="html_map">
-        <MyContext value={{ onDelete, onChange, activeId, activeItemType }}>
+        <myContext.Provider value={{ onDelete, onChange, activeId, activeItemType }}>
           <Kanban html={html} onDragEnd={onDragEnd} onDragStart={onDragStart} />
-        </MyContext>
+        </myContext.Provider>
 
         <Button
           onClick={() => {

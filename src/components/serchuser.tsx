@@ -34,7 +34,7 @@ interface GetUsersResponse {
   }[];
 }
 
-const SerchUser = () => {
+const SerchUser = async() => {
   const { loading, error, data } = useQuery<GetUsersResponse>(GET_USERS);
 
   const searchParams = useSearchParams();

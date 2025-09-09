@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { TableCell, TableKit } from "@tiptap/extension-table";
-import { MyContext } from "@/app/profile/edit/page";
+import myContext from "@/lib/content.ts";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import "@/style/item.scss";
@@ -16,7 +16,7 @@ interface ItemProps {
 }
 
 const Item: React.FC<ItemProps> = ({ text, id, index }) => {
-  const { onChange, onDelete } = useContext(MyContext)!;
+  const { onChange, onDelete } = useContext(myContext)!;
   const [twoColumns, setTwoColumns] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
