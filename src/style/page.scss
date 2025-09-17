@@ -1,0 +1,64 @@
+@use "./variables" as *;
+
+.main_page {
+  padding-left: 104px;
+  padding-right: 104px;
+  text-align: center;
+  height: calc(100vh - 56px);
+  align-content: center;
+
+  h1 {
+    font-family: "Padauk";
+    font-weight: 400;
+    font-size: 64px;
+    margin: 0 0 16px 0
+  }
+
+  h3 {
+    font-family: "Rubic";
+    font-weight: 100;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .buttons {
+    justify-self: center;
+    width: max-content;
+    margin-top: 64px;
+
+    a {
+      border-radius: 50px;
+      padding: 20px 40px;
+      font-family: "Actor";
+      font-size: 20px;
+      justify-content: center;
+      color: #333;
+
+      &:first-child {
+        background-color: $blue;
+        color: #fff;
+      }
+    }
+  }
+}
+
+
+
+
+@media screen and (width < 900px) {
+  .main_page {
+    padding-left: 56px;
+    padding-right: 56px;
+
+    
+  }
+}
+
+
+@media screen and (width < 450px) {
+  .main_page {
+    padding-left: 24px;
+    padding-right: 24px;
+
+  }
+}

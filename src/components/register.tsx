@@ -71,7 +71,7 @@ const Register = () => {
   
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="input">
       <TextField
         required
         id="email"
@@ -97,13 +97,12 @@ const Register = () => {
         onChange={(e) => setRetryPassword(e.target.value)}
       />
 
-      <Button type="submit" variant="contained" disabled={loading}>
+      <Button className="submit" type="submit" variant="contained" disabled={loading}>
         {loading ? "Logging in..." : "Register"}
       </Button>
 
       {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
 
-      <Button variant="outlined">Outlined</Button>
     </form>
   );
 };

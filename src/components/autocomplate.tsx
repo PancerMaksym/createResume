@@ -52,7 +52,7 @@ const AutoComplete = () => {
       options={data?.getTags ?? []}
       onChange={(event, value) => {
         if (value) {
-          handleSearch(value); // автоматичний перехід
+          handleSearch(value); 
         }
       }}
 

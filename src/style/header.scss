@@ -1,38 +1,83 @@
-.header{
-    position: sticky;
+@use "./variables" as *;
+
+.header {
+  position: sticky;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-family: "Actor";
+  font-size: 24px;
+  height: 56px;
+  padding-left: 104px;
+  padding-right: 104px;
+  background-color: $secondary-white;
+
+  .main_button {
+    color: #333;
+    padding-left: 24px;
+    padding-right: 24px;
+
+    &:hover {
+      background-color: $primary-white;
+    }
+  }
+
+  .right {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    height: 10vh;
-    padding-left: 8px;
-    padding-right: 8px;
-    background-color: aqua;
+    gap: 8px;
+    align-items: center;
 
-    .right{
-        display: flex;
-        flex-direction: row;
-        gap: 8px;
-        //justify-content: center;
-        align-items: center;
-        
-        .MuiFormControl-root{
-            
-            width: 20vw;
-            //min-width: 120px;
-            height: 8vh;
-            display: flex;
-            align-items: center;
+    .MuiFormControl-root {
+      width: 20vw;
+      height: 8vh;
+      display: flex;
+      align-items: center;
 
-            .css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root{
-                transform: translate(14px, 50%) scale(1);
-            }
+      .css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root {
+        transform: translate(14px, 50%) scale(1);
+      }
 
-            .MuiInputBase-root{
-                border-radius: 50px;
-                height: 100%;
-            }
-
-            
-        }
+      .MuiInputBase-root {
+        border-radius: 50px;
+        height: 100%;
+      }
     }
+  }
+}
+
+
+@media screen and (width < 900px) {
+  .header {
+    padding-left: 56px;
+    padding-right: 56px;
+
+    
+  }
+}
+
+
+@media screen and (width < 450px) {
+  .header {
+    padding-left: 24px;
+    padding-right: 24px;
+
+    .right {
+
+      .MuiFormControl-root{
+        width: auto;
+
+        .MuiInputAdornment-root {
+          margin: 0;
+        }
+      }
+
+      label {
+        display: none;
+      }
+      input {
+        display: none;
+      }
+    }
+  }
 }

@@ -24,9 +24,17 @@ interface ItemProps {
   html: ColumnType[];
   onDragEnd: ({ active, over }: DragEndEvent) => void;
   onDragStart: ({ active }: DragStartEvent) => void;
+  onDelete: (index: number) => void;
+  onChange: (newText: string, index: number) => void;
 }
 
-const Kanban = ({ html, onDragEnd, onDragStart }: ItemProps) => {
+const Kanban = ({
+  html,
+  onDragEnd,
+  onDragStart,
+  onChange,
+  onDelete,
+}: ItemProps) => {
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
@@ -43,7 +51,14 @@ const Kanban = ({ html, onDragEnd, onDragStart }: ItemProps) => {
         <SortableContext items={html} strategy={verticalListSortingStrategy}>
           {html.map((item, index) => (
             <div key={`${item.id}`} id={`${item.id}`}>
-              <Item text={item.content} index={index} id={item.id} />
+              <Item
+                key={item.id}
+                text={item.content}
+                index={index}
+                id={item.id}
+                onDelete={onDelete}
+                onChange={onChange}
+              />
             </div>
           ))}
         </SortableContext>
@@ -52,4 +67,4 @@ const Kanban = ({ html, onDragEnd, onDragStart }: ItemProps) => {
   );
 };
 
-export default Kanban;
+export default React.memo(Kanban);

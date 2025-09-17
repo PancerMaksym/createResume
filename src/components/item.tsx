@@ -1,23 +1,36 @@
 "use client";
-import React, { useContext, useState, useRef } from "react";
+import React, { useState, useRef, memo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { TableCell, TableKit } from "@tiptap/extension-table";
-import myContext from "@/lib/content.ts";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import TextAlign from "@tiptap/extension-text-align";
+
+import ViewDayIcon from "@mui/icons-material/ViewDay";
+import ViewColumnIcon from "@mui/icons-material/ViewColumn";
+import ImageIcon from "@mui/icons-material/Image";
+import DeleteIcon from "@mui/icons-material/Delete";
+import UndoIcon from "@mui/icons-material/Undo";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
+import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
+import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
+import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import DragHandleIcon from "@mui/icons-material/DragHandle";
+
 import "@/style/item.scss";
 
 interface ItemProps {
   text: string;
   id: string;
   index: number;
+  onDelete: (index: number) => void;
+  onChange: (newText: string, index: number) => void;
 }
 
-const Item: React.FC<ItemProps> = ({ text, id, index }) => {
-  const { onChange, onDelete } = useContext(myContext)!;
-  const [twoColumns, setTwoColumns] = useState(false);
+const Item: React.FC<ItemProps> = ({ text, id, index, onChange, onDelete }) => {
+  const [twoColumns, setTwoColumns] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -37,6 +50,9 @@ const Item: React.FC<ItemProps> = ({ text, id, index }) => {
       }),
       TableCell,
       Image,
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
     ],
     content: text,
     immediatelyRender: false,
@@ -57,8 +73,7 @@ const Item: React.FC<ItemProps> = ({ text, id, index }) => {
     });
 
     const data = await res.json();
-    console.log("data: ", data)
-    // Вставляємо картинку в редактор
+    console.log("data: ", data);
     editor.chain().focus().setImage({ src: data.imgUrl }).run();
   };
 
@@ -71,11 +86,9 @@ const Item: React.FC<ItemProps> = ({ text, id, index }) => {
     setTwoColumns((prev) => !prev);
   };
 
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log("file: ", file)
+    console.log("file: ", file);
     if (file) {
       await uploadStagedFile(file);
     }
@@ -87,44 +100,98 @@ const Item: React.FC<ItemProps> = ({ text, id, index }) => {
 
   return (
     <div ref={setNodeRef} style={style} className="item-block">
-      <div {...attributes} {...listeners}>
-        ...
+      <div {...attributes} {...listeners} className="handle">
+        <DragHandleIcon />
       </div>
 
-      <div className="toolbar">
-        <button onClick={() => editor.chain().focus().toggleBold().run()}>
-          Bold
-        </button>
-        <button onClick={() => editor.chain().focus().toggleCode().run()}>
-          Code
-        </button>
-        <button onClick={() => editor.chain().focus().toggleItalic().run()}>
-          Italic
-        </button>
-        <button onClick={() => editor.chain().focus().toggleBulletList().run()}>
-          • List
-        </button>
-        <button onClick={handleToggleColumns}>
-          {!twoColumns ? "Add Column" : "Delete Columns"}
-        </button>
-        <button onClick={triggerFileInput}>Add image</button>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-      </div>
+      <div className="main_block">
+        <div className="toolbar">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive("bold") ? "active" : ""}
+          >
+            <strong>B</strong>
+          </button>
 
-      <div className="delete">
-        <button onClick={() => onDelete(index)}>Delete</button>
-        <button onClick={() => editor.chain().focus().undo().run()}>Undo</button>
-      </div>
+          <button
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            className={editor.isActive("code") ? "active" : ""}
+          >
+            {"</>"}
+          </button>
 
-      <EditorContent editor={editor} />
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive("italic") ? "active" : ""}
+          >
+            <em>I</em>
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive("bulletList") ? "active" : ""}
+          >
+            •
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            className={editor.isActive({ textAlign: "left" }) ? "active" : ""}
+          >
+            <FormatAlignLeftIcon />
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            className={editor.isActive({ textAlign: "center" }) ? "active" : ""}
+          >
+            <FormatAlignCenterIcon />
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            className={editor.isActive({ textAlign: "right" }) ? "active" : ""}
+          >
+            <FormatAlignRightIcon />
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+            className={
+              editor.isActive({ textAlign: "justify" }) ? "active" : ""
+            }
+          >
+            <FormatAlignJustifyIcon />
+          </button>
+
+          <button onClick={handleToggleColumns}>
+            {!twoColumns ? <ViewDayIcon /> : <ViewColumnIcon />}
+          </button>
+
+          <button onClick={triggerFileInput}>
+            <ImageIcon />
+          </button>
+
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+
+          <button onClick={() => onDelete(index)}>
+            <DeleteIcon />
+          </button>
+          <button onClick={() => editor.chain().focus().undo().run()}>
+            <UndoIcon />
+          </button>
+        </div>
+
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };
 
-export default Item;
+export default memo(Item);

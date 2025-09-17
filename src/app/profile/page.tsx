@@ -49,7 +49,7 @@ const Profile = () => {
   }
 
   if (error) {
-    return <div>{error.message}</div>;
+    router.push("/register");
   }
 
   const user = data?.me.resume;
@@ -57,46 +57,63 @@ const Profile = () => {
   const onLogout = () => {
     localStorage.setItem("token", "");
     window.dispatchEvent(new Event("storage"));
-    router.push("/");
   };
 
   if (user) {
     return (
       <>
         {user ? (
-          <div className="profile_page">
+          <main className="profile_page">
             <div className="main_part">
-              {user.photo ? (
-                <Avatar src={user.photo} alt={user.name} />
-              ) : (
-                <Avatar>{user.name[0]?.toUpperCase()}</Avatar>
-              )}
-              <div>{user.name}</div>
+              <div className="main_inner">
+                {user.photo ? (
+                  <Avatar src={user.photo} alt={user.name} />
+                ) : (
+                  <Avatar>{user.name[0]?.toUpperCase()}</Avatar>
+                )}
+                <h2>{user.name}</h2>
 
-              {user.place.map((place, index) => (
-                <div key={index}>{place}</div>
-              ))}
+                <div className="places">
+                  <h4>Places:</h4>
+                  {user.place.map((place, index) => (
+                    <div className="single_field" key={index}>
+                      {place}
+                    </div>
+                  ))}
+                </div>
 
-              {user.tags.map((tag, index) => (
-                <div key={index}>{tag}</div>
-              ))}
+                <div className="tags">
+                  <h4>Tags:</h4>
+                  {user.tags.map((tag, index) => (
+                    <div className="single_field" key={index}>
+                      {tag}
+                    </div>
+                  ))}
+                </div>
 
-              <Link href={"/profile/edit"}>
-                <Button variant="contained">Edit Resume</Button>
-              </Link>
-              <Button variant="contained" onClick={onLogout}>
-                LogOut
-              </Button>
+                <div className="user_button">
+                  <Link href={"/profile/edit"}>
+                    <Button variant="contained">Edit</Button>
+                  </Link>
+                  <Link className="logout_button" href={"/"}>
+                    <Button onClick={onLogout} variant="contained">
+                      LogOut
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
             <div className="html_part">
-              {user.HTMLpart.map((html) => (
-                <div
-                  key={html.id}
-                  dangerouslySetInnerHTML={{ __html: html.content }}
-                />
-              ))}
+              <div className="html_inner">
+                {user.HTMLpart.map((html) => (
+                  <div
+                    key={html.id}
+                    dangerouslySetInnerHTML={{ __html: html.content }}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </main>
         ) : (
           <Link href={"/profile/edit"}>
             <Button variant="contained">Create Resume</Button>

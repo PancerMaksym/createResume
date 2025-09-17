@@ -1,25 +1,23 @@
+@use "./variables" as *;
+
 table {
   width: 100%;
   border-collapse: collapse;
   min-height: 1rem;
-
   p {
     margin: 0;
   }
-
   td {
     width: 50%;
     vertical-align: top;
-    height:100%;
+    height: 100%;
     text-align: left;
     padding: 16px;
-
     img {
       max-width: 100%;
     }
-
     &:focus-within {
-      border-color: #4f46e5; 
+      border-color: #4f46e5;
       box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
       background-color: #4f46e5;
     }
@@ -27,17 +25,166 @@ table {
 }
 
 .profile_page,
-.user_page{
+.user_page,
+.edit_page {
   display: flex;
-  flex-wrap: nowrap;
+  height: calc(100vh - 56px);
+  overflow: hidden;
 }
 
-.main_part{
+.main_part {
   flex: 0 0 25%;
-  background-color: #d1fdff;
-  height: 90vh;
+  background-color: $secondary-white;
+  height: 100%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: content-box;
+
+  .main_inner {
+    padding: 32px 24px 32px 46px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    z-index: 4;
+    margin-right: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $blue;
+    border-radius: 50%;
+  }
+
+  .MuiAvatar-root {
+    aspect-ratio: 1/1;
+    width: 80%;
+    height: auto;
+    border: 1px solid $primary-white;
+  }
+
+  .user_button {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+
+    a {
+      flex: 1;
+    }
+
+    button {
+      padding: 6px 0;
+      width: 100%;
+      background-color: transparent;
+      box-shadow: none;
+      color: #333;
+      border-radius: 20px;
+      border: 1px solid $blue;
+    }
+  }
+
+  .places,
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+
+    .single_field,
+    .MuiInputBase-root {
+      border-radius: 15px;
+      border: 1px solid $primary-white;
+      padding: 4px;
+      background-color: $primary-white;
+
+      input {
+        margin-left: 4px;
+      }
+    }
+
+    h4 {
+      margin: 0;
+    }
+  }
 }
 
 .html_part {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100%;
 
+  .html_inner {
+    border-radius: 24px;
+    padding: 16px;
+    background-color: $secondary-white;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &::-webkit-scrollbar {
+    width: 2px;
+    z-index: 4;
+    margin-right: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $blue;
+    border-radius: 50%;
+  }
+}
+
+@media screen and (width < 900px) {
+  table {
+    td {
+      width: auto;
+      display: block;
+    }
+  }
+
+  .main_part {
+    flex: 30% 0 0;
+  }
+}
+
+@media screen and (width < 650px) {
+  .tableWrapper {
+    table {
+      tr {
+        td {
+          width: auto;
+          display: block;
+        }
+      }
+    }
+  }
+
+  .profile_page,
+  .user_page,
+  .edit_page {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  .main_part {
+    flex: 30% 0 0;
+
+    .MuiAvatar-root {
+      align-self: center;
+    }
+  }
 }

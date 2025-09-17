@@ -15,8 +15,8 @@ const LOGIN_USER = gql`
 const Login = () => {
   const router = useRouter();
   const [loginUser, { loading, error }] = useMutation(LOGIN_USER);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,7 +29,7 @@ const Login = () => {
       if (data?.loginUser?.token) {
         localStorage.setItem("token", data.loginUser.token);
         window.dispatchEvent(new Event("storage"));
-        router.push('/profile');
+        router.push("/profile");
       }
     } catch (err) {
       console.error("Login error", err);
@@ -37,7 +37,7 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="input">
       <TextField
         required
         id="email"
@@ -46,25 +46,32 @@ const Login = () => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <TextField
-        required
-        id="password"
-        label="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        autoComplete="current-password"
-      />
+      <div className="password">
+        <TextField
+          required
+          id="password"
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
 
-      <Link href="/forgot-password" passHref>
-        <Button variant="text">Forgot password</Button>
-      </Link>
+        <Link href="/forgot-password" passHref className="forgot">
+          <Button variant="text">Forgot password</Button>
+        </Link>
+      </div>
 
-      <Button type="submit" variant="contained" disabled={loading}>
-        {loading ? 'Logging in...' : 'LogIn'}
+      <Button
+        className="submit"
+        type="submit"
+        variant="contained"
+        disabled={loading}
+      >
+        {loading ? "Logging in..." : "LogIn"}
       </Button>
 
-      {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
+      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
     </form>
   );
 };

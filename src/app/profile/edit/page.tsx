@@ -1,21 +1,14 @@
 "use client";
+
 import { Avatar, Button, TextField } from "@mui/material";
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import "@/style/edit.scss";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import React from "react";
-import {
-  DragEndEvent,
-  DragStartEvent,
-  UniqueIdentifier,
-} from "@dnd-kit/core";
+import { DragEndEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core";
 import Kanban from "@/components/kanban";
-import myContext from "@/lib/content.ts";
+import "@/style/profile.scss";
+import Main from "@/components/main";
 
 const GET_USER = gql`
   query Query {
@@ -25,7 +18,10 @@ const GET_USER = gql`
         photo
         place
         tags
-        HTMLpart
+        HTMLpart {
+          id
+          content
+        }
       }
     }
   }
@@ -44,7 +40,7 @@ interface Resume {
   tags: string[];
   HTMLpart: {
     id: string;
-    content: string
+    content: string;
   }[];
 }
 
@@ -66,8 +62,6 @@ const createColumn = (
   id,
   content,
 });
-
-
 
 const EditPage = () => {
   const router = useRouter();
@@ -126,33 +120,51 @@ const EditPage = () => {
     onBlurUpdate: (newVal: string) => void;
   }) => {
     const [localValue, setLocalValue] = useState(value);
+    const spanRef = useRef<HTMLSpanElement>(null);
+    const [width, setWidth] = useState(40);
+
+    useEffect(() => {
+      if (spanRef.current) {
+        setWidth(spanRef.current.offsetWidth + 20);
+      }
+    }, [localValue]);
 
     useEffect(() => {
       setLocalValue(value);
     }, [value]);
 
     return (
-      <TextField
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
-        onBlur={() => onBlurUpdate(localValue)}
-        variant="outlined"
-        InputProps={{
-          sx: {
-            padding: 0,
+      <div className="field">
+        <span
+          ref={spanRef}
+          style={{
+            position: "absolute",
+            visibility: "hidden",
+            whiteSpace: "pre",
+            font: "inherit",
+          }}
+        >
+          {localValue || " "}
+        </span>
+
+        <TextField
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          onBlur={() => onBlurUpdate(localValue)}
+          variant="outlined"
+          InputProps={{
+            sx: {
+              padding: 0,
+              width: "auto",
+            },
+          }}
+          inputProps={{ style: { width, padding: 0 }, maxLength: 20 }}
+          sx={{
             width: "auto",
-          },
-        }}
-        inputProps={{
-          style: {
-            width: `${Math.max(localValue.length, 4)}ch`,
-          },
-        }}
-        sx={{
-          width: "auto",
-          minWidth: "40px",
-        }}
-      />
+            minWidth: "40px",
+          }}
+        />
+      </div>
     );
   };
 
@@ -190,113 +202,57 @@ const EditPage = () => {
     if (!destination) return;
   };
 
-  const onDelete = (index: number) => {
-    const updated = [...html];
-    updated.splice(index, 1);
+  const onDelete = useCallback((index: number) => {
+    setHtml((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
-    setHtml(updated);
-  };
-
-  const onChange = (newText: string, index: number) => {
-    const updated = [...html];
-    updated[index].content = newText;
-    setHtml(updated);
-  };
+  const onChange = useCallback((newText: string, index: number) => {
+    setHtml((prev) => {
+      const updated = [...prev];
+      updated[index].content = newText;
+      return updated;
+    });
+  }, []);
 
   return (
-    <div className="edit_page">
-      <div className="main-part">
-        <div>
-          <input
-            ref={inputRef}
-            id="photo-input"
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  setImage(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-              }
+    <main className="edit_page">
+      <div className="main_part">
+        <div className="main_inner">
+          <Main
+            image={image}
+            name={name}
+            places={places}
+            tags={tags}
+            onImageChange={setImage}
+            onNameChange={setName}
+            onPlacesChange={setPlaces}
+            onTagsChange={setTags}
+            onSave={onSave}
+            AutoWidthTextField={AutoWidthTextField}
+          />
+        </div>
+      </div>
+
+      <div className="html_part">
+        <div className="html_inner">
+          <Kanban
+            html={html}
+            onDragEnd={onDragEnd}
+            onDragStart={onDragStart}
+            onChange={onChange}
+            onDelete={onDelete}
+          />
+
+          <Button
+            onClick={() => {
+              setHtml([...html, createColumn()]);
             }}
-          />
-          <Avatar
-            src={image}
-            sx={{ width: 50, height: 50, cursor: "pointer" }}
-            onClick={() => inputRef.current?.click()}
-          />
-        </div>
-
-        <TextField
-          id="standard-required"
-          focused
-          label="Name"
-          variant="standard"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <div className="places">
-          {places.map((place, index) => (
-            <AutoWidthTextField
-              key={`place-${index}`}
-              value={place}
-              onBlurUpdate={(newVal) => {
-                setPlaces((prev) => {
-                  const updated = [...prev];
-                  updated[index] = newVal;
-                  return updated;
-                });
-              }}
-            />
-          ))}
-          <Button onClick={() => setPlaces((prev) => [...prev, ""])}>
-            Add place
+          >
+            Add block
           </Button>
         </div>
-
-        <div className="tags">
-          {tags.map((tag, index) => (
-            <AutoWidthTextField
-              key={`tag-${index}`}
-              value={tag}
-              onBlurUpdate={(newVal) => {
-                setTags((prev) => {
-                  const updated = [...prev];
-                  updated[index] = newVal;
-                  return updated;
-                });
-              }}
-            />
-          ))}
-          <Button onClick={() => setTags((prev) => [...prev, ""])}>
-            Add tag
-          </Button>
-        </div>
-
-        <Button variant="contained" onClick={onSave}>
-          Save Data
-        </Button>
       </div>
-
-      <div className="html_map">
-        <myContext.Provider value={{ onDelete, onChange, activeId, activeItemType }}>
-          <Kanban html={html} onDragEnd={onDragEnd} onDragStart={onDragStart} />
-        </myContext.Provider>
-
-        <Button
-          onClick={() => {
-            setHtml([...html, createColumn()]);
-          }}
-        >
-          Add block
-        </Button>
-      </div>
-    </div>
+    </main>
   );
 };
 

@@ -4,7 +4,7 @@ import { Close } from "@mui/icons-material";
 import { Avatar, Button, CircularProgress } from "@mui/material";
 import { ObjectId } from "mongodb";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const GET_USERS = gql`
   query Query {
@@ -29,12 +29,12 @@ interface Resume {
 
 interface GetUsersResponse {
   getUsers: {
-    _id: ObjectId
+    _id: ObjectId;
     resume: Resume;
   }[];
 }
 
-const SerchUser = async() => {
+const SerchUser = () => {
   const { loading, error, data } = useQuery<GetUsersResponse>(GET_USERS);
 
   const searchParams = useSearchParams();
@@ -60,23 +60,18 @@ const SerchUser = async() => {
     }
   }
 
-  if (error) {
-    return (
-      <>
-        <div>Error</div>
-      </>
-    );
-  }
-
   if (loading) {
     return <CircularProgress />;
   }
 
+  if (error) {
+    return <div>Error</div>;
+  }
   return (
     <div>
       <div className="tags">
         {tags.map((tag, index) => (
-          <div key={index}>
+          <div key={index} className="tag">
             {tag}
             <Button
               variant="text"
@@ -92,29 +87,30 @@ const SerchUser = async() => {
           </div>
         ))}
       </div>
-      {filteredUsers.length > 0 ? (
-        filteredUsers.map((user, index) => (
-          <Link key={index} href={`/serch/${user._id}`}>
-            <div>
-            {user.resume.photo ? (
-              <Avatar
-                src={user.resume.photo}
-                alt={user.resume.name}
-              />
-            ) : (
-              <Avatar
-                alt={user.resume.name}
-              >{user.resume.name[0]?.toUpperCase()}</Avatar>
-            )}
-            <h3>{user.resume.name}</h3>
-            <p>Place: {user.resume.place.join(", ")}</p>
-            <p>Tags: {user.resume.tags.join(", ")}</p>
-            </div>
-          </Link>
-        ))
-      ) : (
-        <div>No users found with the selected tags</div>
-      )}
+      <div className="users">
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map((user, index) => (
+            <Link key={index} href={`/serch/${user._id}`}>
+              <div className="user">
+                {user.resume.photo ? (
+                  <Avatar src={user.resume.photo} alt={user.resume.name} />
+                ) : (
+                  <Avatar alt={user.resume.name}>
+                    {user.resume.name[0]?.toUpperCase()}
+                  </Avatar>
+                )}
+                <div className="user_data">
+                  <h3>{user.resume.name}</h3>
+                  <p className="user_place">{user.resume.place.join(", ")}</p>
+                  <p className="user_tag">{user.resume.tags.join(", ")}</p>
+                </div>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <div>No users found with the selected tags</div>
+        )}
+      </div>
     </div>
   );
 };

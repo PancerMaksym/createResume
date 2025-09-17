@@ -14,7 +14,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    handleStorageChange(); // ← Викликаємо функцію одразу при завантаженні
+    handleStorageChange(); 
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
@@ -28,7 +28,7 @@ const Header = () => {
 
   return (
     <div className="header">
-      <Link href="/">Text</Link>
+      <Link className="main_button" href="/">Text</Link>
       <div className="right">
         <AutoComplete />
         <Link href={token ? "/profile" : "/register"}>
