@@ -5,6 +5,7 @@ import User from "@/lib/models/user";
 import { gql } from "graphql-tag";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 
 await connectDB();
 
@@ -17,7 +18,7 @@ const typeDefs = gql`
   input HTMLPartInput {
     id: String
     content: String
-  } 
+  }
 
   type User {
     _id: ID!
@@ -56,6 +57,8 @@ const typeDefs = gql`
     addUser(email: String!, password: String!): String!
     updateResume(resume: ResumeInput): String!
     loginUser(email: String!, password: String!): AuthPayload!
+    sendEmail(email: String!): String!
+    setNewPassword(token: String!, password: String!): String!
   }
 `;
 
@@ -90,8 +93,7 @@ const resolvers = {
     me: async (_, __, { user }) => {
       if (!user) throw new Error("Unauthorized");
       return user;
-    }
-    
+    },
   },
 
   Mutation: {
@@ -146,11 +148,61 @@ const resolvers = {
         throw new Error("Невірний пароль");
       }
 
-      const token = generateToken(user.id); 
+      const token = generateToken(user.id);
 
       return {
         token,
       };
+    },
+    sendEmail: async (_, { email }) => {
+      try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASS,
+          },
+        });
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: "15m",
+        });
+
+        await transporter.sendMail({
+          from: `"Create Resume" <${process.env.MAIL_USER}>`,
+          to: email,
+          subject: "Reset your password",
+          text: `Click here to reset your password: ${process.env.NEXT_PUBLIC_DOMAIN}/reset?token=${token}`,
+        });
+
+        return "Success";
+      } catch (err) {
+        throw new Error(err.message || "Error sending email");
+      }
+    },
+    setNewPassword: async (_, { token, password }) => {
+      try {
+        const saltRounds = 10;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        await User.findByIdAndUpdate(
+          userId,
+          { $set: { password: hashedPassword } },
+          { new: true }
+        );
+
+        return "Success";
+      } catch (err) {
+        throw new Error(err.message || "Error change password");
+      }
     },
   },
 };
@@ -177,7 +229,6 @@ const getLoggedInUser = async (req) => {
 
   return null;
 };
-
 
 const handler = startServerAndCreateNextHandler(server, {
   context: async (req) => ({

@@ -57,7 +57,7 @@ const Login = () => {
           autoComplete="current-password"
         />
 
-        <Link href="/forgot-password" passHref className="forgot">
+        <Link href="/forgot" passHref className="forgot">
           <Button variant="text">Forgot password</Button>
         </Link>
       </div>
