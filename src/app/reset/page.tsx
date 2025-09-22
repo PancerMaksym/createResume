@@ -3,6 +3,7 @@ import { gql, useMutation } from "@apollo/client";
 import { TextField } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
+import "@/style/reset.scss"
 
 const SET_NEW_PASSWORD = gql`
   mutation setNewPassword($token: String!, $password: String!) {
@@ -34,7 +35,7 @@ const ResetPage = () => {
   };
 
   return (
-    <main>
+    <main className="reset_page">
       <h2>Reset password</h2>
       <form onSubmit={onSubmit}>
         <TextField

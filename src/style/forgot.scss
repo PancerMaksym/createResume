@@ -1,0 +1,52 @@
+@use "./variables" as *;
+
+.forgot_page {
+  background-color: $secondary-white;
+  width: max-content;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 52px;
+  justify-self: center;
+
+  section {
+    justify-items: center;
+  }
+
+  button {
+    background-color: $secondary-white;
+    padding: 16px 0;
+    border-radius: 30px;
+    border: 1px solid $primary-white;
+    font-size: larger;
+    cursor: pointer;
+    &:hover {
+      background-color: $primary-white;
+    }
+  }
+
+  .buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    min-width: 300px;
+
+    * {
+      width: inherit;
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media screen and (width < 450px) {
+  .forgot_page {
+    .buttons {
+      flex-direction: column;
+    }
+  }
+}

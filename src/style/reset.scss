@@ -1,0 +1,29 @@
+@use "./variables" as *;
+
+.reset_page {
+  background-color: $secondary-white;
+  width: max-content;
+  padding: 24px;
+  border-radius: 16px;
+  margin-top: 52px;
+  justify-self: center;
+  text-align: center;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    button {
+      background-color: $secondary-white;
+      padding: 16px 0;
+      border-radius: 30px;
+      border: 1px solid $primary-white;
+      font-size: larger;
+      cursor: pointer;
+      &:hover {
+        background-color: $primary-white;
+      }
+    }
+  }
+}

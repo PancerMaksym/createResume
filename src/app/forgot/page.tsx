@@ -3,6 +3,7 @@
 import { gql, useMutation } from "@apollo/client";
 import { TextField } from "@mui/material";
 import React, { Dispatch, SetStateAction, useState } from "react";
+import "@/style/forgot.scss"
 
 const SEND_EMAIL = gql`
   mutation User($email: String!) {
@@ -39,7 +40,7 @@ const Forgot = () => {
   };
 
   return (
-    <main>
+    <main className="forgot_page">
       {!sent ? (
         <Email onSubmit={handleSubmit} setEmail={setEmail} email={email} />
       ) : (
@@ -88,7 +89,7 @@ const Res = ({
   return (
     <section>
       <h2>Successfully sent</h2>
-      <div>
+      <div className="buttons">
         <button onClick={onRetry}>Back</button>
         <button onClick={sendToEmail}>Send Again</button>
       </div>
