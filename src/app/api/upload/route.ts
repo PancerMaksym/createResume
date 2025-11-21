@@ -1,4 +1,4 @@
-import { cloudinary } from "@/lib/cloudinary";
+import { cloudinary } from "../../../lib/cloudinary";
 import { UploadApiErrorResponse, UploadApiResponse } from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
 

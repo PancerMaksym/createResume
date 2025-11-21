@@ -1,20 +1,20 @@
-"use client";
-import { gql, useMutation } from "@apollo/client";
-import { TextField } from "@mui/material";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
-import "@/style/reset.scss"
+'use client';
+import { gql, useMutation } from '@apollo/client';
+import { TextField } from '@mui/material';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
+import '../../style/reset.scss';
 
 const SET_NEW_PASSWORD = gql`
-  mutation setNewPassword($token: String!, $password: String!) {
-    setNewPassword(token: $token, password: $password)
+  mutation UpdateUser($token: String!, $password: String!) {
+    updateUser(token: $token, password: $password)
   }
 `;
 
 const ResetPage = () => {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const [password, setPassword] = useState("");
+  const token = searchParams.get('token');
+  const [password, setPassword] = useState('');
   const [setNewPassword, { loading, error }] = useMutation(SET_NEW_PASSWORD);
   const router = useRouter();
 
@@ -27,12 +27,24 @@ const ResetPage = () => {
       },
     });
 
-    if (checkResult.data.setNewPassword === "Success") {
-      router.push("/register");
+    if (checkResult.data.updateUser === 'Success') {
+      router.push('/register');
     } else {
-      console.error("Error:", checkResult.data.setNewPassword);
+      console.error('Error:', checkResult.errors);
     }
   };
+
+  if(loading){
+    return (
+      <h3>loading...</h3>
+    )
+  }
+
+  if(error){
+    return (
+      <h3>${error?.message}</h3>
+    )
+  }
 
   return (
     <main className="reset_page">

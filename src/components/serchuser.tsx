@@ -1,21 +1,18 @@
-"use client";
-import { useQuery, gql } from "@apollo/client";
-import { Close } from "@mui/icons-material";
-import { Avatar, Button, CircularProgress } from "@mui/material";
-import { ObjectId } from "mongodb";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+'use client';
+import { useQuery, gql } from '@apollo/client';
+import { Close } from '@mui/icons-material';
+import { Avatar, Button, CircularProgress } from '@mui/material';
+import { ObjectId } from 'mongodb';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const GET_USERS = gql`
-  query Query {
-    getUsers {
-      _id
-      resume {
-        name
-        photo
-        place
-        tags
-      }
+  query GetUsers($first: Int, $cursor: Int!) {
+    findUsers(first: 5, cursor: $cursor) {
+      id
+      photo
+      name
+      tags
     }
   }
 `;
@@ -40,11 +37,11 @@ const SerchUser = () => {
   const searchParams = useSearchParams();
   const tags =
     searchParams
-      .get("tags")
-      ?.split(",")
-      .filter((tag) => tag.trim() !== "") ?? [];
+      .get('tags')
+      ?.split(',')
+      .filter((tag) => tag.trim() !== '') ?? [];
 
-  let filteredUsers: GetUsersResponse["getUsers"][number][] = [];
+  let filteredUsers: GetUsersResponse['getUsers'][number][] = [];
 
   if (data) {
     if (tags && tags.length > 0) {
@@ -78,8 +75,8 @@ const SerchUser = () => {
               onClick={() => {
                 const newTags = tags.filter((allTag) => allTag !== tag);
                 const updatedUrl = new URL(window.location.href);
-                updatedUrl.searchParams.set("tags", newTags.join(","));
-                window.history.pushState({}, "", updatedUrl);
+                updatedUrl.searchParams.set('tags', newTags.join(','));
+                window.history.pushState({}, '', updatedUrl);
               }}
             >
               <Close />
@@ -101,8 +98,8 @@ const SerchUser = () => {
                 )}
                 <div className="user_data">
                   <h3>{user.resume.name}</h3>
-                  <p className="user_place">{user.resume.place.join(", ")}</p>
-                  <p className="user_tag">{user.resume.tags.join(", ")}</p>
+                  <p className="user_place">{user.resume.place.join(', ')}</p>
+                  <p className="user_tag">{user.resume.tags.join(', ')}</p>
                 </div>
               </div>
             </Link>

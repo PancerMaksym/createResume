@@ -1,7 +1,7 @@
 import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
-import { connectDB } from "@/lib/db";
-import User from "@/lib/models/user";
+import { connectDB } from "../../../lib/db";
+import User from "../../../lib/models/user";
 import { gql } from "graphql-tag";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -78,18 +78,15 @@ const resolvers = {
     getUsers: async () => {
       return await User.find({ "resume.name": { $exists: true, $ne: "" } });
     },
-
     getUser: async (_, { id }) => {
       return await User.findById(id);
     },
-
     getTags: async () => {
       const Tags = [
         ...new Set((await User.find()).flatMap((user) => user.resume.tags)),
       ];
       return Tags;
     },
-
     me: async (_, __, { user }) => {
       if (!user) throw new Error("Unauthorized");
       return user;
@@ -123,7 +120,6 @@ const resolvers = {
         return "Error";
       }
     },
-
     updateResume: async (_, { resume }, { user }) => {
       if (!user) throw new Error("Unauthorized");
 
@@ -135,7 +131,6 @@ const resolvers = {
 
       return "Success";
     },
-
     loginUser: async (_, { email, password }) => {
       const user = await User.findOne({ email });
 

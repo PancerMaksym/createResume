@@ -1,35 +1,31 @@
-"use client";
+'use client';
 
-import { Avatar, Button, TextField } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { gql, useMutation, useQuery } from "@apollo/client";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { DragEndEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core";
-import Kanban from "@/components/kanban";
-import "@/style/profile.scss";
-import Main from "@/components/main";
+import { Avatar, Button, TextField } from '@mui/material';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { DragEndEvent, DragStartEvent, UniqueIdentifier } from '@dnd-kit/core';
+import Kanban from '../../../components/kanban';
+import '../../../style/profile.scss';
+import Main from '../../../components/main';
 
 const GET_USER = gql`
-  query Query {
-    me {
-      resume {
-        name
-        photo
-        place
-        tags
-        HTMLpart {
-          id
-          content
-        }
-      }
+  query GetProfile {
+    getProfile {
+      id
+      name
+      photo
+      tags
+      places
+      html_parts
     }
   }
 `;
 
 const UPDATE_RESUME = gql`
-  mutation UpdateResume($resume: ResumeInput) {
-    updateResume(resume: $resume)
+  mutation UpdateResume($updateProfileInput: UpdateProfileIntut!) {
+    updateProfile(updateProfileInput: $updateProfileInput)
   }
 `;
 
@@ -44,12 +40,6 @@ interface Resume {
   }[];
 }
 
-interface GetUsersResponse {
-  me: {
-    resume: Resume | null;
-  };
-}
-
 interface ColumnType {
   id: string;
   content: string;
@@ -57,7 +47,7 @@ interface ColumnType {
 
 const createColumn = (
   id: string = Math.random().toString(36).substring(2, 10),
-  content: string = "<table><tbody><tr><td/></tr></tbody></table>"
+  content = '<table><tbody><tr><td/></tr></tbody></table>'
 ): ColumnType => ({
   id,
   content,
@@ -65,16 +55,15 @@ const createColumn = (
 
 const EditPage = () => {
   const router = useRouter();
-  const { loading, error, data } = useQuery<GetUsersResponse>(GET_USER);
-  const [updateResume, { loading: updatelog, error: updateerr }] =
-    useMutation(UPDATE_RESUME);
+  const { loading, error, data } = useQuery<Resume>(GET_USER);
+  const [updateResume] = useMutation(UPDATE_RESUME);
 
-  const user = data?.me.resume;
+  const user = data;
 
-  const [image, setImage] = useState<string>(user ? user.photo : "");
-  const [name, setName] = useState<string>(user ? user.name : "");
-  const [places, setPlaces] = useState<string[]>(user ? user.place : [""]);
-  const [tags, setTags] = useState<string[]>(user ? user.tags : [""]);
+  const [image, setImage] = useState<string>(user ? user.photo : '');
+  const [name, setName] = useState<string>(user ? user.name : '');
+  const [places, setPlaces] = useState<string[]>(user ? user.place : ['']);
+  const [tags, setTags] = useState<string[]>(user ? user.tags : ['']);
   const initialHtml: ColumnType[] = user
     ? user.HTMLpart.map((column) => createColumn(column.id, column.content))
     : [createColumn()];
@@ -82,7 +71,7 @@ const EditPage = () => {
   const [html, setHtml] = useState<ColumnType[]>(initialHtml);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  const [activeItemType, setActiveType] = useState<"Item" | "Row" | null>(null);
+  const [activeItemType, setActiveType] = useState<'Item' | 'Row' | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -98,13 +87,13 @@ const EditPage = () => {
             HTMLpart: html,
           },
         },
-        refetchQueries: ["Query"],
+        refetchQueries: ['Query'],
         awaitRefetchQueries: true,
       });
 
-      router.push("/profile");
+      router.push('/profile');
     } catch (err) {
-      console.error("Failed to update resume:", err);
+      console.error('Failed to update resume:', err);
     }
   };
 
@@ -138,13 +127,13 @@ const EditPage = () => {
         <span
           ref={spanRef}
           style={{
-            position: "absolute",
-            visibility: "hidden",
-            whiteSpace: "pre",
-            font: "inherit",
+            position: 'absolute',
+            visibility: 'hidden',
+            whiteSpace: 'pre',
+            font: 'inherit',
           }}
         >
-          {localValue || " "}
+          {localValue || ' '}
         </span>
 
         <TextField
@@ -155,13 +144,13 @@ const EditPage = () => {
           InputProps={{
             sx: {
               padding: 0,
-              width: "auto",
+              width: 'auto',
             },
           }}
           inputProps={{ style: { width, padding: 0 }, maxLength: 20 }}
           sx={{
-            width: "auto",
-            minWidth: "40px",
+            width: 'auto',
+            minWidth: '40px',
           }}
         />
       </div>
@@ -176,8 +165,8 @@ const EditPage = () => {
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     setActiveId(null);
     setActiveType(null);
-    console.log("Active: ", active);
-    console.log("Over: ", over);
+    console.log('Active: ', active);
+    console.log('Over: ', over);
 
     if (!over?.data?.current || !active.data?.current) {
       return;
@@ -193,7 +182,7 @@ const EditPage = () => {
       updatedHtml[active.data.current.sortable.index],
     ];
 
-    console.log("updatedHtml: ", updatedHtml);
+    console.log('updatedHtml: ', updatedHtml);
     setHtml(updatedHtml);
   };
 
@@ -202,17 +191,17 @@ const EditPage = () => {
     if (!destination) return;
   };
 
-  const onDelete = useCallback((index: number) => {
+  const onDelete = (index: number) => {
     setHtml((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  };
 
-  const onChange = useCallback((newText: string, index: number) => {
+  const onChange = (newText: string, index: number) => {
     setHtml((prev) => {
       const updated = [...prev];
       updated[index].content = newText;
       return updated;
     });
-  }, []);
+  };
 
   return (
     <main className="edit_page">

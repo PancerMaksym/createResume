@@ -1,12 +1,12 @@
-import { gql, useMutation } from "@apollo/client";
-import { Button, TextField } from "@mui/material";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { gql, useMutation } from '@apollo/client';
+import { Button, TextField } from '@mui/material';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 
 const LOGIN_USER = gql`
-  mutation LoginUser($email: String!, $password: String!) {
-    loginUser(email: $email, password: $password) {
+  mutation Login($email: String!, $password: String!) {
+    login(createUserInput: { email: $email, password: $password }) {
       token
     }
   }
@@ -15,8 +15,8 @@ const LOGIN_USER = gql`
 const Login = () => {
   const router = useRouter();
   const [loginUser, { loading, error }] = useMutation(LOGIN_USER);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,13 +26,14 @@ const Login = () => {
         variables: { email, password },
       });
 
-      if (data?.loginUser?.token) {
-        localStorage.setItem("token", data.loginUser.token);
-        window.dispatchEvent(new Event("storage"));
-        router.push("/profile");
+      console.log('Data: ', data);
+      if (data.login.token) {
+        localStorage.setItem('token', data.login.token);
+        window.dispatchEvent(new Event('storage'));
+        router.push('/profile');
       }
     } catch (err) {
-      console.error("Login error", err);
+      console.error('Login error', err);
     }
   };
 
@@ -68,10 +69,10 @@ const Login = () => {
         variant="contained"
         disabled={loading}
       >
-        {loading ? "Logging in..." : "LogIn"}
+        {loading ? 'Logging in...' : 'LogIn'}
       </Button>
 
-      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
     </form>
   );
 };

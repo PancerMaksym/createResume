@@ -1,23 +1,18 @@
-"use client";
+'use client';
 
-import { gql, useQuery } from "@apollo/client";
-import { Avatar } from "@mui/material";
-import "@/style/profile.scss";
-import { useParams } from "next/navigation";
+import { gql, useQuery } from '@apollo/client';
+import { Avatar } from '@mui/material';
+import '@/style/profile.scss';
+import { useParams } from 'next/navigation';
 
 const GET_USER = gql`
-  query Query($id: ID!) {
-    getUser(id: $id) {
-      resume {
-        name
-        photo
-        place
-        tags
-        HTMLpart {
-          id
-          content
-        }
-      }
+  query FindUser($id: Int) {
+    findUser(id: $id) {
+      name
+      photo
+      tags
+      places
+      html_parts
     }
   }
 `;
@@ -33,16 +28,10 @@ interface Resume {
   }[];
 }
 
-interface GetUsersResponse {
-  getUser: {
-    resume: Resume | null;
-  };
-}
-
 const UserPageWrapper = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { loading, error, data } = useQuery<GetUsersResponse>(GET_USER, {
+  const { loading, error, data } = useQuery<Resume>(GET_USER, {
     variables: { id },
   });
 
@@ -50,7 +39,7 @@ const UserPageWrapper = () => {
   if (error) return <div>{error.message}</div>;
 
   if (data) {
-    const user = data?.getUser.resume;
+    const user = data;
 
     if (!user) return <div>User not found</div>;
 

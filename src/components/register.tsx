@@ -1,74 +1,64 @@
-import { gql, useMutation } from "@apollo/client";
-import { Button, TextField } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { gql, useMutation } from '@apollo/client';
+import { Button, TextField } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 
 const ADD_USER = gql`
-  mutation AddUser($email: String!, $password: String!) {
-    addUser(email: $email, password: $password)
+  mutation Create($email: String!, $password: String!) {
+    create(createUserInput: { email: $email, password: $password }) {
+      id
+    }
   }
 `;
 
 const LOGIN_USER = gql`
-  mutation LoginUser($email: String!, $password: String!) {
-    loginUser(email: $email, password: $password) {
+  mutation login($email: String!, $password: String!) {
+    login(createUserInput: { email: $email, password: $password }) {
       token
-      user {
-        resume {
-          photo
-          name
-          place
-          tags
-          HTMLpart
-        }
-      }
     }
   }
 `;
 
-
 const Register = () => {
-
   const router = useRouter();
   const [addUser, { loading, error }] = useMutation(ADD_USER);
   const [loginUser] = useMutation(LOGIN_USER);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [retryPassword, setRetryPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [retryPassword, setRetryPassword] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+
     try {
-      if (!email.includes("@")) {
-        throw new Error("Некоректний email");
+      if (!email.includes('@')) {
+        throw new Error('Некоректний email');
       }
-  
+
       if (password !== retryPassword) {
-        throw new Error("Паролі не співпадають");
+        throw new Error('Паролі не співпадають');
       }
-  
+
       const registerResult = await addUser({
         variables: {
           email: email.trim(),
-          password: password.trim()
+          password: password.trim(),
         },
       });
 
-      if (registerResult.data.addUser === "Success") {
+      if (registerResult.data.addUser === 'Success') {
         const loginResult = await loginUser({ variables: { email, password } });
 
         if (loginResult.data?.loginUser?.token) {
-          localStorage.setItem("token", loginResult.data.loginUser.token);
-          window.dispatchEvent(new Event("storage"));
-          router.push("/profile");
+          localStorage.setItem('token', loginResult.data.login.token);
+          window.dispatchEvent(new Event('storage'));
+          router.push('/profile');
         }
       }
     } catch (err) {
-      console.error("Login error", err);
+      console.error('Login error', err);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="input">
@@ -97,12 +87,16 @@ const Register = () => {
         onChange={(e) => setRetryPassword(e.target.value)}
       />
 
-      <Button className="submit" type="submit" variant="contained" disabled={loading}>
-        {loading ? "Logging in..." : "Register"}
+      <Button
+        className="submit"
+        type="submit"
+        variant="contained"
+        disabled={loading}
+      >
+        {loading ? 'Logging in...' : 'Register'}
       </Button>
 
-      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
-
+      {error && <p style={{ color: 'red' }}>Error: {error.message}</p>}
     </form>
   );
 };

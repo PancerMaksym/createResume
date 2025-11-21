@@ -2,9 +2,9 @@
 
 import { Button } from "@mui/material";
 import { useState } from "react";
-import Login from "@/components/login";
-import Register from "@/components/register";
-import "@/style/register.scss";
+import Login from "../../components/login";
+import Register from "../../components/register";
+import "../../style/register.scss";
 
 const LogReg = () => {
   const [isLogin, setLogin] = useState(true);

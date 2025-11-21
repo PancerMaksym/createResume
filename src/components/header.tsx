@@ -1,28 +1,30 @@
 "use client";
 import { Avatar } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "../style/header.scss";
 import AutoComplete from "./autocomplate.tsx";
 import Link from "next/link";
+import { gql, useQuery } from "@apollo/client";
+
+const GET_USER = gql`
+  query GetProfile{
+    getProfile{
+      id
+      name
+      photo
+    }
+  }
+`;
+
+interface Resume {
+  name: string;
+  photo: string;
+}
 
 const Header = () => {
-  const [token, setToken] = useState<string | null>(null);
+  const { loading, data } = useQuery<Resume>(GET_USER);
 
-  const handleStorageChange = () => {
-    const storedToken = localStorage.getItem("token") || "";
-    setToken(storedToken);
-  };
-
-  useEffect(() => {
-    handleStorageChange(); 
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
-  if (token === null) {
+  if (loading) {
     return <div className="header">Loading...</div>;
   }
 
@@ -31,8 +33,8 @@ const Header = () => {
       <Link className="main_button" href="/">Text</Link>
       <div className="right">
         <AutoComplete />
-        <Link href={token ? "/profile" : "/register"}>
-          <Avatar>{token ? "P" : "R"}</Avatar>
+        <Link href={data ? "/profile" : "/register"}>
+          <Avatar>{data ?  (`${data.photo}` && "P") : "R"}</Avatar>
         </Link>
       </div>
     </div>

@@ -14,14 +14,14 @@ function makeClient() {
     fetchOptions: { cache: "no-store" },
   });
 
+  console.log("GraphQL:", process.env.NEXT_PUBLIC_GRAPHQL_DOMAIN);
+
   const authLink = setContext((_, { headers }) => {
     if (typeof window === "undefined") return { headers };
 
-    const token = localStorage.getItem("token");
     return {
       headers: {
         ...headers,
-        authorization: token ? `Bearer ${token}` : "",
       },
     };
   });
