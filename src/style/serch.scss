@@ -46,6 +46,10 @@
     flex-wrap: wrap;
     gap: 24px;
 
+    a{
+      flex: 1;
+    }
+
     .user {
       border-radius: 24px;
       background-color: $secondary-white;
@@ -73,7 +77,8 @@
         flex: 1;
 
         .user_tag,
-        .user_place {
+        .user_place,
+        h3 {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -86,8 +91,8 @@
 @media screen and (width < 900px) {
   .serch_page {
     .custom-input {
-      padding-left: 7vw;
-      padding-right: 7vw;
+      padding-left: 0vw;
+      padding-right: 0vw;
     }
 
     .users {
@@ -97,7 +102,8 @@
       gap: 24px;
 
       a {
-        max-width: 100%;
+        flex: 1 1 300px;
+        
       }
       .user {
         width: 100%;
@@ -118,6 +124,10 @@
       flex-direction: row;
       flex-wrap: wrap;
       gap: 24px;
+
+      a{
+        width: 100%;
+      }
 
       .user {
         max-width: 100%;

@@ -5,9 +5,7 @@ import { FormEvent, useState } from 'react';
 
 const ADD_USER = gql`
   mutation Create($email: String!, $password: String!) {
-    create(createUserInput: { email: $email, password: $password }) {
-      id
-    }
+    create(createUserInput: { email: $email, password: $password })
   }
 `;
 
@@ -46,12 +44,11 @@ const Register = () => {
         },
       });
 
-      if (registerResult.data.addUser === 'Success') {
+      if (registerResult.data === 'Success') {
         const loginResult = await loginUser({ variables: { email, password } });
 
         if (loginResult.data?.loginUser?.token) {
-          localStorage.setItem('token', loginResult.data.login.token);
-          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new Event('auth:changed'));
           router.push('/profile');
         }
       }

@@ -2,17 +2,20 @@
 
 import { gql, useQuery } from '@apollo/client';
 import { Avatar } from '@mui/material';
-import '@/style/profile.scss';
+import '../../../style/profile.scss';
 import { useParams } from 'next/navigation';
 
 const GET_USER = gql`
-  query FindUser($id: Int) {
+  query FindUser($id: Int!) {
     findUser(id: $id) {
       name
       photo
       tags
       places
-      html_parts
+      html_parts {
+        id
+        content
+      }
     }
   }
 `;
@@ -20,18 +23,19 @@ const GET_USER = gql`
 interface Resume {
   name: string;
   photo: string;
-  place: string[];
   tags: string[];
-  HTMLpart: {
+  places: string[];
+  html_parts: {
     id: string;
     content: string;
   }[];
 }
 
 const UserPageWrapper = () => {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const id = Number(params.id);
 
-  const { loading, error, data } = useQuery<Resume>(GET_USER, {
+  const { loading, error, data } = useQuery<{ findUser: Resume }>(GET_USER, {
     variables: { id },
   });
 
@@ -39,7 +43,7 @@ const UserPageWrapper = () => {
   if (error) return <div>{error.message}</div>;
 
   if (data) {
-    const user = data;
+    const user = data.findUser;
 
     if (!user) return <div>User not found</div>;
 
@@ -57,7 +61,7 @@ const UserPageWrapper = () => {
 
             <div className="places">
               <h4>Places:</h4>
-              {user.place.map((place, index) => (
+              {user.places.map((place, index) => (
                 <div className="single_field" key={index}>
                   {place}
                 </div>
@@ -76,7 +80,7 @@ const UserPageWrapper = () => {
         </div>
         <div className="html_part">
           <div className="html_inner">
-            {user.HTMLpart.map((html) => (
+            {user.html_parts.map((html) => (
               <div
                 key={html.id}
                 dangerouslySetInnerHTML={{ __html: html.content }}

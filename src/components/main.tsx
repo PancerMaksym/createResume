@@ -1,5 +1,5 @@
-import React from "react";
-import { Avatar, Button, TextField } from "@mui/material";
+import React, { useState } from 'react';
+import { Avatar, Button, TextField } from '@mui/material';
 
 interface AutoWidthTextFieldProps {
   value: string;
@@ -17,6 +17,29 @@ interface MainProps {
   onTagsChange: (newTags: string[]) => void;
   onSave: () => void;
   AutoWidthTextField: React.FC<AutoWidthTextFieldProps>;
+}
+
+function EditableName({
+  name,
+  onNameChange,
+}: {
+  name: string;
+  onNameChange: (value: string) => void;
+}) {
+  const [localData, setLocalData] = useState(name);
+
+  return (
+    <TextField
+      className="name_input"
+      id="standard-required"
+      focused
+      label="Name"
+      variant="standard"
+      value={localData}
+      onChange={(e) => setLocalData(e.target.value)}
+      onBlur={(e) => onNameChange(e.target.value)}
+    />
+  );
 }
 
 const Main: React.FC<MainProps> = ({
@@ -41,7 +64,7 @@ const Main: React.FC<MainProps> = ({
           id="photo-input"
           type="file"
           accept="image/*"
-          style={{ display: "none" }}
+          style={{ display: 'none' }}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -55,11 +78,10 @@ const Main: React.FC<MainProps> = ({
         />
         <Avatar
           src={image}
-          sx={{ width: 50, height: 50, cursor: "pointer" }}
+          sx={{ width: 50, height: 50, cursor: 'pointer' }}
           onClick={() => inputRef.current?.click()}
         />
       </div>
-
       <TextField
         className="name_input"
         id="standard-required"
@@ -68,11 +90,12 @@ const Main: React.FC<MainProps> = ({
         variant="standard"
         value={name}
         onChange={(e) => onNameChange(e.target.value)}
+        onBlur={(e) => onNameChange(e.target.value)}
       />
 
       <div className="places">
         <h4>Places:</h4>
-        {places.map((place, index) => (
+        {places?.map((place, index) => (
           <AutoWidthTextField
             key={`place-${index}`}
             value={place}
@@ -83,12 +106,14 @@ const Main: React.FC<MainProps> = ({
             }}
           />
         ))}
-        <Button onClick={() => onPlacesChange([...places, ""])}>Add place</Button>
+        <Button onClick={() => onPlacesChange([...places, ''])}>
+          Add place
+        </Button>
       </div>
 
       <div className="tags">
         <h4>Tags:</h4>
-        {tags.map((tag, index) => (
+        {tags?.map((tag, index) => (
           <AutoWidthTextField
             key={`tag-${index}`}
             value={tag}
@@ -99,7 +124,7 @@ const Main: React.FC<MainProps> = ({
             }}
           />
         ))}
-        <Button onClick={() => onTagsChange([...tags, ""])}>Add tag</Button>
+        <Button onClick={() => onTagsChange([...tags, ''])}>Add tag</Button>
       </div>
 
       <Button variant="contained" onClick={onSave}>

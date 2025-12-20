@@ -12,9 +12,8 @@ function makeClient() {
   const httpLink = new HttpLink({
     uri: process.env.NEXT_PUBLIC_GRAPHQL_DOMAIN,
     fetchOptions: { cache: "no-store" },
+    credentials: 'include'
   });
-
-  console.log("GraphQL:", process.env.NEXT_PUBLIC_GRAPHQL_DOMAIN);
 
   const authLink = setContext((_, { headers }) => {
     if (typeof window === "undefined") return { headers };

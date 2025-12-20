@@ -3,20 +3,19 @@ import { Button, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import {publish} from './../components/header'
 
 const LOGIN_USER = gql`
   mutation Login($email: String!, $password: String!) {
-    login(createUserInput: { email: $email, password: $password }) {
-      token
-    }
+    login(createUserInput: { email: $email, password: $password })
   }
 `;
 
 const Login = () => {
   const router = useRouter();
   const [loginUser, { loading, error }] = useMutation(LOGIN_USER);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,10 +25,8 @@ const Login = () => {
         variables: { email, password },
       });
 
-      console.log('Data: ', data);
-      if (data.login.token) {
-        localStorage.setItem('token', data.login.token);
-        window.dispatchEvent(new Event('storage'));
+      if (data.login) {
+        publish('auth:changed');
         router.push('/profile');
       }
     } catch (err) {

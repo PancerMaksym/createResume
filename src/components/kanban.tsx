@@ -49,7 +49,7 @@ const Kanban = ({
         sensors={sensors}
       >
         <SortableContext items={html} strategy={verticalListSortingStrategy}>
-          {html.map((item, index) => (
+          {html?.map((item, index) => (
             <div key={`${item.id}`} id={`${item.id}`}>
               <Item
                 key={item.id}

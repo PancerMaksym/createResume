@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { gql, useMutation } from "@apollo/client";
-import { TextField } from "@mui/material";
-import React, { Dispatch, SetStateAction, useState } from "react";
-import "../../style/forgot.scss"
+import { gql, useMutation } from '@apollo/client';
+import { TextField } from '@mui/material';
+import React, { Dispatch, SetStateAction, useState } from 'react';
+import '../../style/forgot.scss';
 
 const SEND_EMAIL = gql`
   mutation User($email: String!) {
@@ -13,8 +13,8 @@ const SEND_EMAIL = gql`
 
 const Forgot = () => {
   const [sent, setSent] = useState(false);
-  const [email, setEmail] = useState<string>("");
-  const [sendEmail ] = useMutation(SEND_EMAIL);
+  const [email, setEmail] = useState<string>('');
+  const [sendEmail] = useMutation(SEND_EMAIL);
 
   const sendToEmail = async () => {
     const checkResult = await sendEmail({
@@ -23,10 +23,10 @@ const Forgot = () => {
       },
     });
 
-    if (checkResult.data.sendEmail === "Success") {
+    if (checkResult.data.sendEmail === 'Success') {
       setSent(true);
     } else {
-      console.error("Error:", checkResult.data.sendEmail);
+      console.error('Error:', checkResult.data.sendEmail);
     }
   };
 

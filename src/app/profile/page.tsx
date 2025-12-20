@@ -1,29 +1,40 @@
 'use client';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import { Avatar, Button } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import '../../style/profile.scss';
+import { useApolloClient } from '@apollo/client';
+import {publish} from './../../components/header'
 
 const GET_USER = gql`
   query GetProfile {
     getProfile {
       id
-      name
       photo
-      tags
+      name
       places
-      html_parts
+      tags
+      html_parts {
+        id
+        content
+      }
     }
+  }
+`;
+
+const LOGOUT = gql`
+  mutation Logout {
+    logout
   }
 `;
 
 interface Resume {
   name: string;
   photo: string;
-  place: string[];
+  places: string[];
   tags: string[];
-  HTMLpart: {
+  html_parts: {
     id: string;
     content: string;
   }[];
@@ -31,8 +42,12 @@ interface Resume {
 
 const Profile = () => {
   const router = useRouter();
-
-  const { loading, error, data } = useQuery<Resume>(GET_USER);
+  const client = useApolloClient();
+  const [LogOut] =
+    useMutation<{logout: string}>(LOGOUT);
+  const { loading, error, data } = useQuery<{ getProfile: Resume }>(GET_USER, {
+    fetchPolicy: 'network-only',
+  });
 
   if (loading) {
     return <div>Loading</div>;
@@ -42,65 +57,81 @@ const Profile = () => {
     router.push('/register');
   }
 
-  const user = data;
+  const user = data?.getProfile;
 
-  const onLogout = () => {
-    localStorage.setItem('token', '');
-    window.dispatchEvent(new Event('storage'));
+  const onLogout = async () => {
+    try {
+      const res = await LogOut();
+      if (res?.data?.logout !== 'Logged out') {
+        return
+      }
+      
+      await client.clearStore();
+      await publish('auth:changed');
+      router.push('/');
+    } catch (err) {
+      console.error('Logout error', err);
+    }
   };
 
   return (
     <>
-      {user ? (
+      {user?.name !== '' && user ? (
         <main className="profile_page">
           <div className="main_part">
             <div className="main_inner">
               {user.photo ? (
                 <Avatar src={user.photo} alt={user.name} />
-              ) : (
-                <Avatar>{user.name[0]?.toUpperCase()}</Avatar>
-              )}
-              <h2>{user.name}</h2>
-
-              <div className="places">
-                <h4>Places:</h4>
-                {user.place.map((place, index) => (
-                  <div className="single_field" key={index}>
-                    {place}
-                  </div>
-                ))}
-              </div>
-
-              <div className="tags">
-                <h4>Tags:</h4>
-                {user.tags.map((tag, index) => (
-                  <div className="single_field" key={index}>
-                    {tag}
-                  </div>
-                ))}
-              </div>
+              ) : user.name ? (
+                <Avatar>{user?.name[0]?.toUpperCase()}</Avatar>
+              ) : null}
+              {user.name ? <h2>{user.name}</h2> : null}
+              {user.places ? (
+                <div className="places">
+                  <h4>Places:</h4>
+                  {user.places.map((place, index) => (
+                    <div className="single_field" key={index}>
+                      {place}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {user.tags ? (
+                <div className="tags">
+                  <h4>Tags:</h4>
+                  {user.tags.map((tag, index) => (
+                    <div className="single_field" key={index}>
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="user_button">
                 <Link href={'/profile/edit'}>
-                  <Button variant="contained">Edit</Button>
+                  <Button id='edit' variant="contained">Edit</Button>
                 </Link>
-                <Link className="logout_button" href={'/'}>
+                <div>
                   <Button onClick={onLogout} variant="contained">
                     LogOut
                   </Button>
-                </Link>
+                </div>
               </div>
             </div>
           </div>
           <div className="html_part">
-            <div className="html_inner">
-              {user.HTMLpart.map((html) => (
-                <div
-                  key={html.id}
-                  dangerouslySetInnerHTML={{ __html: html.content }}
-                />
-              ))}
-            </div>
+            {user.places ? (
+              <>
+                <div className="html_inner">
+                  {user.html_parts.map((html) => (
+                    <div
+                      key={html.id}
+                      dangerouslySetInnerHTML={{ __html: html.content }}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
         </main>
       ) : (

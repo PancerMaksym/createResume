@@ -9,32 +9,50 @@ import { DragEndEvent, DragStartEvent, UniqueIdentifier } from '@dnd-kit/core';
 import Kanban from '../../../components/kanban';
 import '../../../style/profile.scss';
 import Main from '../../../components/main';
+import { arrayMove } from '@dnd-kit/sortable';
 
 const GET_USER = gql`
   query GetProfile {
     getProfile {
       id
-      name
       photo
-      tags
+      name
       places
-      html_parts
+      tags
+      html_parts {
+        id
+        content
+      }
     }
   }
 `;
 
 const UPDATE_RESUME = gql`
-  mutation UpdateResume($updateProfileInput: UpdateProfileIntut!) {
-    updateProfile(updateProfileInput: $updateProfileInput)
+  mutation UpdateResume(
+    $photo: String!
+    $name: String!
+    $places: [String!]
+    $tags: [String!]
+    $html_parts: [HtmlPartInput!]
+  ) {
+    updateProfile(
+      updateProfileInput: {
+        name: $name
+        photo: $photo
+        tags: $tags
+        places: $places
+        html_parts: $html_parts
+      }
+    )
   }
 `;
 
 interface Resume {
   name: string;
   photo: string;
-  place: string[];
+  places: string[];
   tags: string[];
-  HTMLpart: {
+  html_parts: {
     id: string;
     content: string;
   }[];
@@ -55,51 +73,73 @@ const createColumn = (
 
 const EditPage = () => {
   const router = useRouter();
-  const { loading, error, data } = useQuery<Resume>(GET_USER);
-  const [updateResume] = useMutation(UPDATE_RESUME);
+  const [updateResume] = useMutation<{ updateProfile: string }>(UPDATE_RESUME);
+  const { loading, error, data } = useQuery<{ getProfile: Resume }>(GET_USER, {
+    fetchPolicy: 'network-only',
+  });
 
-  const user = data;
+  const user = data?.getProfile;
 
-  const [image, setImage] = useState<string>(user ? user.photo : '');
-  const [name, setName] = useState<string>(user ? user.name : '');
-  const [places, setPlaces] = useState<string[]>(user ? user.place : ['']);
-  const [tags, setTags] = useState<string[]>(user ? user.tags : ['']);
-  const initialHtml: ColumnType[] = user
-    ? user.HTMLpart.map((column) => createColumn(column.id, column.content))
-    : [createColumn()];
-
-  const [html, setHtml] = useState<ColumnType[]>(initialHtml);
+  const [photo, setPhoto] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [places, setPlaces] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(['']);
+  const [htmlParts, setHtmlParts] = useState<ColumnType[]>([]);
+  const htmlPartsRef = useRef<ColumnType[]>([]);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [activeItemType, setActiveType] = useState<'Item' | 'Row' | null>(null);
-
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setPhoto(user.photo);
+    setName(user.name);
+    setPlaces(user.places ?? ['']);
+    setTags(user.tags ?? ['']);
+
+    const initial = user.html_parts?.length
+      ? user.html_parts.map((c) => createColumn(c.id, c.content))
+      : [createColumn()];
+
+    setHtmlParts(initial);
+    htmlPartsRef.current = initial;
+  }, [user]);
+
+  const syncHtml = (next: ColumnType[]) => {
+    setHtmlParts(next);
+    htmlPartsRef.current = next;
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error.message}</div>;
+  if (!user) return <div>No user found</div>;
 
   const onSave = async () => {
     try {
-      await updateResume({
+      const mappedHtmlParts = htmlPartsRef.current.map((p) => ({
+        id: p.id,
+        content: p.content,
+      }));
+
+      const res = await updateResume({
         variables: {
-          resume: {
-            name,
-            photo: image,
-            place: places,
-            tags,
-            HTMLpart: html,
-          },
+          photo,
+          name,
+          places,
+          tags,
+          html_parts: mappedHtmlParts,
         },
-        refetchQueries: ['Query'],
-        awaitRefetchQueries: true,
       });
 
-      router.push('/profile');
+      if (res.data?.updateProfile === 'Success') {
+        router.push('/profile');
+      }
     } catch (err) {
       console.error('Failed to update resume:', err);
     }
   };
-
-  if (loading) return <div>loading...</div>;
-  if (error) return <div>{error.message}</div>;
-  if (!user) return <div>No user data found</div>;
 
   const AutoWidthTextField = ({
     value,
@@ -163,27 +203,14 @@ const EditPage = () => {
   }
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
-    setActiveId(null);
-    setActiveType(null);
-    console.log('Active: ', active);
-    console.log('Over: ', over);
+    if (!over) return;
 
-    if (!over?.data?.current || !active.data?.current) {
-      return;
-    }
+    const oldIndex = htmlParts.findIndex((p) => p.id === active.id);
+    const newIndex = htmlParts.findIndex((p) => p.id === over.id);
 
-    const updatedHtml = [...html];
+    if (oldIndex === -1 || newIndex === -1) return;
 
-    [
-      updatedHtml[active.data.current.sortable.index],
-      updatedHtml[over.data.current.sortable.index],
-    ] = [
-      updatedHtml[over.data.current.sortable.index],
-      updatedHtml[active.data.current.sortable.index],
-    ];
-
-    console.log('updatedHtml: ', updatedHtml);
-    setHtml(updatedHtml);
+    syncHtml(arrayMove(htmlParts, oldIndex, newIndex));
   };
 
   const onDragUpdate = (update: any) => {
@@ -192,15 +219,13 @@ const EditPage = () => {
   };
 
   const onDelete = (index: number) => {
-    setHtml((prev) => prev.filter((_, i) => i !== index));
+    syncHtml(htmlParts.filter((_, i) => i !== index));
   };
 
   const onChange = (newText: string, index: number) => {
-    setHtml((prev) => {
-      const updated = [...prev];
-      updated[index].content = newText;
-      return updated;
-    });
+    syncHtml(
+      htmlParts.map((p, i) => (i === index ? { ...p, content: newText } : p))
+    );
   };
 
   return (
@@ -208,11 +233,11 @@ const EditPage = () => {
       <div className="main_part">
         <div className="main_inner">
           <Main
-            image={image}
+            image={photo}
             name={name}
             places={places}
             tags={tags}
-            onImageChange={setImage}
+            onImageChange={setPhoto}
             onNameChange={setName}
             onPlacesChange={setPlaces}
             onTagsChange={setTags}
@@ -225,18 +250,14 @@ const EditPage = () => {
       <div className="html_part">
         <div className="html_inner">
           <Kanban
-            html={html}
+            html={htmlParts}
             onDragEnd={onDragEnd}
             onDragStart={onDragStart}
             onChange={onChange}
             onDelete={onDelete}
           />
 
-          <Button
-            onClick={() => {
-              setHtml([...html, createColumn()]);
-            }}
-          >
+          <Button onClick={() => syncHtml([...htmlParts, createColumn()])}>
             Add block
           </Button>
         </div>

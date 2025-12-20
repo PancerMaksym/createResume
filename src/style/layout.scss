@@ -1,13 +1,12 @@
 @use "./variables" as *;
 
-html, 
-body {
-    margin: 0;
+html{
+    justify-items: center;
 }
 
 body{
     margin: 0%;
-
+    max-width: 2084px;
     a{
         display: flex;
         align-items: center;

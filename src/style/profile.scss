@@ -70,17 +70,22 @@ table {
     border: 1px solid $primary-white;
   }
 
+  #edit {
+    background-color: $blue;
+    color: white;
+  }
+
   .user_button {
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap;
     gap: 8px;
 
-    a {
+    * {
       flex: 1;
     }
 
     button {
-      padding: 6px 0;
+      padding: 6px 18px;
       width: 100%;
       background-color: transparent;
       box-shadow: none;

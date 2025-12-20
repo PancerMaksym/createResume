@@ -1,7 +1,7 @@
 import * as React from "react";
 import AutoComplete from "../../components/autocomplate.tsx";
 import SerchUser from "../../components/serchuser.tsx";
-import "@/style/serch.scss"
+import "../../style/serch.scss"
 
 const SerchPage = () => {
 
