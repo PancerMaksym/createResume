@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Avatar, Button, TextField } from '@mui/material';
 
 interface AutoWidthTextFieldProps {
@@ -17,29 +17,6 @@ interface MainProps {
   onTagsChange: (newTags: string[]) => void;
   onSave: () => void;
   AutoWidthTextField: React.FC<AutoWidthTextFieldProps>;
-}
-
-function EditableName({
-  name,
-  onNameChange,
-}: {
-  name: string;
-  onNameChange: (value: string) => void;
-}) {
-  const [localData, setLocalData] = useState(name);
-
-  return (
-    <TextField
-      className="name_input"
-      id="standard-required"
-      focused
-      label="Name"
-      variant="standard"
-      value={localData}
-      onChange={(e) => setLocalData(e.target.value)}
-      onBlur={(e) => onNameChange(e.target.value)}
-    />
-  );
 }
 
 const Main: React.FC<MainProps> = ({

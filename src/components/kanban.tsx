@@ -6,7 +6,6 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-  DragStartEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -23,7 +22,6 @@ interface ColumnType {
 interface ItemProps {
   html: ColumnType[];
   onDragEnd: ({ active, over }: DragEndEvent) => void;
-  onDragStart: ({ active }: DragStartEvent) => void;
   onDelete: (index: number) => void;
   onChange: (newText: string, index: number) => void;
 }
@@ -31,7 +29,6 @@ interface ItemProps {
 const Kanban = ({
   html,
   onDragEnd,
-  onDragStart,
   onChange,
   onDelete,
 }: ItemProps) => {
@@ -45,7 +42,6 @@ const Kanban = ({
     <>
       <DndContext
         onDragEnd={onDragEnd}
-        onDragStart={onDragStart}
         sensors={sensors}
       >
         <SortableContext items={html} strategy={verticalListSortingStrategy}>

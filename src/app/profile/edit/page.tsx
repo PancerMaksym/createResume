@@ -1,11 +1,11 @@
 'use client';
 
-import { Avatar, Button, TextField } from '@mui/material';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button, TextField } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 import { gql, useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { DragEndEvent, DragStartEvent, UniqueIdentifier } from '@dnd-kit/core';
+import { DragEndEvent } from '@dnd-kit/core';
 import Kanban from '../../../components/kanban';
 import '../../../style/profile.scss';
 import Main from '../../../components/main';
@@ -86,10 +86,6 @@ const EditPage = () => {
   const [tags, setTags] = useState<string[]>(['']);
   const [htmlParts, setHtmlParts] = useState<ColumnType[]>([]);
   const htmlPartsRef = useRef<ColumnType[]>([]);
-
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  const [activeItemType, setActiveType] = useState<'Item' | 'Row' | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -197,11 +193,6 @@ const EditPage = () => {
     );
   };
 
-  function onDragStart({ active }: DragStartEvent) {
-    setActiveType(active.data.current?.type);
-    setActiveId(active.data.current?.id);
-  }
-
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) return;
 
@@ -211,11 +202,6 @@ const EditPage = () => {
     if (oldIndex === -1 || newIndex === -1) return;
 
     syncHtml(arrayMove(htmlParts, oldIndex, newIndex));
-  };
-
-  const onDragUpdate = (update: any) => {
-    const { destination } = update;
-    if (!destination) return;
   };
 
   const onDelete = (index: number) => {
@@ -252,7 +238,6 @@ const EditPage = () => {
           <Kanban
             html={htmlParts}
             onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
             onChange={onChange}
             onDelete={onDelete}
           />

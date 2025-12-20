@@ -5,7 +5,6 @@ import {
   Autocomplete,
   InputAdornment,
   IconButton,
-  Box,
 } from '@mui/material';
 import { gql, useQuery } from '@apollo/client';
 import { Search } from '@mui/icons-material';
@@ -22,9 +21,8 @@ interface Tags {
 }
 
 const AutoComplete = () => {
-  const { loading, error, data } = useQuery<Tags>(GET_TAGS);
+  const { error, data } = useQuery<Tags>(GET_TAGS);
   const router = useRouter();
-  const [tags, setTags] = React.useState<string[]>([]);
 
   if (error) return <div>Error: {error.message}</div>;
 

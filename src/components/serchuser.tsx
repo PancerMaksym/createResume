@@ -97,6 +97,7 @@ const SerchUser = () => {
       </div>
     );
   }
+  return <CircularProgress />;
 };
 
 export default SerchUser;

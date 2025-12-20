@@ -56,10 +56,6 @@ function subscribe(eventName: string, listener: () => void) {
   document.addEventListener(eventName, listener);
 }
 
-function unsubscribe(eventName: string, listener: () => void) {
-  document.removeEventListener(eventName, listener);
-}
-
 async function publish(eventName: string) {
   const event = new Event(eventName);
   await document.dispatchEvent(event);

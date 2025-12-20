@@ -1,16 +1,14 @@
 'use client';
 import React, { useState, useRef, memo } from 'react';
 
-import { useEditor, EditorContent, useEditorState } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import { TableKit } from '@tiptap/extension-table';
-import { UndoRedo } from '@tiptap/extensions';
+import { TableCell, TableKit } from '@tiptap/extension-table';
+import TextAlign from '@tiptap/extension-text-align';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import TextAlign from '@tiptap/extension-text-align';
-
 import ViewDayIcon from '@mui/icons-material/ViewDay';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import ImageIcon from '@mui/icons-material/Image';
@@ -49,10 +47,12 @@ const Item: React.FC<ItemProps> = ({ text, id, index, onChange, onDelete }) => {
       StarterKit,
       TableKit.configure({
         table: { resizable: true },
+        tableCell: false,
       }),
+      TableCell,
       Image,
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ["heading", "paragraph"],
       }),
     ],
     content: text,
@@ -61,6 +61,7 @@ const Item: React.FC<ItemProps> = ({ text, id, index, onChange, onDelete }) => {
       onChange(editor.getHTML(), index);
     },
   });
+
 
   if (!editor) return null;
 

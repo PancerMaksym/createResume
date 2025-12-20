@@ -91,6 +91,8 @@ const UserPageWrapper = () => {
       </div>
     );
   }
+
+  return <div>loading...</div>
 };
 
 export default UserPageWrapper;
