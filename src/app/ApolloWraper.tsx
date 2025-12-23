@@ -4,23 +4,24 @@ import {
   ApolloClient,
   ApolloNextAppProvider,
   InMemoryCache,
-} from "@apollo/experimental-nextjs-app-support";
-import { HttpLink, from } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+} from '@apollo/experimental-nextjs-app-support';
+import { HttpLink, from } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
 function makeClient() {
   const httpLink = new HttpLink({
     uri: process.env.NEXT_PUBLIC_GRAPHQL_DOMAIN,
-    fetchOptions: { cache: "no-store" },
-    credentials: 'include'
+    credentials: 'include',
+    fetchOptions: {
+      cache: 'no-store',
+    },
   });
 
   const authLink = setContext((_, { headers }) => {
-    if (typeof window === "undefined") return { headers };
-
     return {
       headers: {
         ...headers,
+        'Content-Type': 'application/json',
       },
     };
   });
