@@ -18,10 +18,13 @@ function makeClient() {
   });
 
   const authLink = setContext((_, { headers }) => {
+    if (typeof window === 'undefined') return { headers };
+    const token = localStorage.getItem("access_token");
+
     return {
       headers: {
         ...headers,
-        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
       },
     };
   });

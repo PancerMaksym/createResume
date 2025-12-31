@@ -2,6 +2,7 @@ import { gql, useMutation } from '@apollo/client';
 import { Button, TextField } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import { useCookies } from 'react-cookie';
 
 const ADD_USER = gql`
   mutation Create($email: String!, $password: String!) {
@@ -11,14 +12,13 @@ const ADD_USER = gql`
 
 const LOGIN_USER = gql`
   mutation login($email: String!, $password: String!) {
-    login(createUserInput: { email: $email, password: $password }) {
-      token
-    }
+    login(createUserInput: { email: $email, password: $password })
   }
 `;
 
 const Register = () => {
   const router = useRouter();
+  const [, setCookie] = useCookies(['access_token'])
   const [addUser, { loading, error }] = useMutation(ADD_USER);
   const [loginUser] = useMutation(LOGIN_USER);
   const [email, setEmail] = useState('');
@@ -47,7 +47,10 @@ const Register = () => {
       if (registerResult.data === 'Success') {
         const loginResult = await loginUser({ variables: { email, password } });
 
-        if (loginResult.data?.loginUser?.token) {
+        if (loginResult.data?.login) {
+          const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+          setCookie('access_token', loginResult.data?.login, {expires, path: "/"})
+          localStorage.setItem('access_token', loginResult.data?.login);
           window.dispatchEvent(new Event('auth:changed'));
           router.push('/profile');
         }

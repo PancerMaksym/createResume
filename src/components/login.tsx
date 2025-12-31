@@ -3,7 +3,8 @@ import { Button, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import {publish} from './../components/header'
+import { publish } from './../components/header';
+import { useCookies } from 'react-cookie';
 
 const LOGIN_USER = gql`
   mutation Login($email: String!, $password: String!) {
@@ -16,6 +17,7 @@ const Login = () => {
   const [loginUser, { loading, error }] = useMutation(LOGIN_USER);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [, setCookie] = useCookies(['access_token']);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,6 +28,10 @@ const Login = () => {
       });
 
       if (data.login) {
+        const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+        setCookie('access_token', data.login, { path: '/', expires });
+        localStorage.setItem('access_token', data.login);
         publish('auth:changed');
         router.push('/profile');
       }

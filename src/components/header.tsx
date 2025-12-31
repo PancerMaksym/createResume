@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { gql, useQuery } from '@apollo/client';
 
 const GET_USER = gql`
-  query GetProfile {
-    getProfile {
+  query GetProfile{
+    getProfile{
       id
       name
       photo

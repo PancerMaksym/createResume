@@ -1,15 +1,16 @@
 'use client';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
 import { Avatar, Button } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import '../../style/profile.scss';
 import { useApolloClient } from '@apollo/client';
 import {publish} from './../../components/header'
+import { useCookies } from 'react-cookie';
 
 const GET_USER = gql`
-  query GetProfile {
-    getProfile {
+  query GetProfile{
+    getProfile{
       id
       photo
       name
@@ -20,12 +21,6 @@ const GET_USER = gql`
         content
       }
     }
-  }
-`;
-
-const LOGOUT = gql`
-  mutation Logout {
-    logout
   }
 `;
 
@@ -40,11 +35,11 @@ interface Resume {
   }[];
 }
 
-const Profile = () => {
+const Profile =() => {
   const router = useRouter();
   const client = useApolloClient();
-  const [LogOut] =
-    useMutation<{logout: string}>(LOGOUT);
+  const [, , removeCookie] = useCookies(['access_token'])
+  
   const { loading, error, data } = useQuery<{ getProfile: Resume }>(GET_USER, {
     fetchPolicy: 'network-only',
   });
@@ -61,11 +56,8 @@ const Profile = () => {
 
   const onLogout = async () => {
     try {
-      const res = await LogOut();
-      if (res?.data?.logout !== 'Logged out') {
-        return
-      }
-      
+      removeCookie('access_token', {path: '/'})
+      localStorage.removeItem('access_token')
       await client.clearStore();
       await publish('auth:changed');
       router.push('/');
